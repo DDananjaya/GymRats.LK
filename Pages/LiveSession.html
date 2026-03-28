@@ -39,13 +39,7 @@
   </div>
 
   <script>
-    // Sample data; replace with real data from your schedule page if you wire them together
-    const sampleExercises = [
-      { name: "Squats", sets: "4 x 10", type: "Normal" },
-      { name: "Leg Press", sets: "3 x 12", type: "Drop Set" },
-      { name: "Walking Lunges", sets: "3 x 12/leg", type: "Normal" },
-      { name: "Calf Raises", sets: "4 x 15", type: "Super Set" }
-    ];
+    const token = localStorage.getItem("token");
 
     const listEl = document.getElementById("exercise-list");
     const currentLabel = document.getElementById("current-ex-label");
@@ -55,171 +49,106 @@
     const startBtn = document.getElementById("start-btn");
     const restartBtn = document.getElementById("restart-btn");
 
+    const sampleExercises = [
+      { name: "Squats", sets: "4", reps: "10", type: "Normal" },
+      { name: "Leg Press", sets: "3", reps: "12", type: "Drop Set" },
+      { name: "Walking Lunges", sets: "3", reps: "12/leg", type: "Normal" },
+      { name: "Calf Raises", sets: "4", reps: "15", type: "Super Set" }
+    ];
+
     let exercises = [];
     let currentIndex = -1;
 
     function renderList() {
       listEl.innerHTML = "";
+
       exercises.forEach((ex, idx) => {
         const row = document.createElement("div");
         row.className = "exercise-row";
-        row.dataset.index = idx;
+
+        const setsReps = [ex.sets, ex.reps].filter(Boolean).join(" x ");
+        const meta = [setsReps, ex.type ? `• ${ex.type}` : ""].filter(Boolean).join(" ");
 
         row.innerHTML = `
           <div class="left">
-            <div class="title">${ex.name || "Exercise"}</div>
-            <div class="meta">${ex.sets || ""} ${ex.type ? "• " + ex.type : ""}</div>
+            <div class="title">${ex.day ? ex.day + " - " : ""}${ex.name || "Exercise"}</div>
+            <div class="meta">${meta}</div>
           </div>
           <div class="right">
             <span class="status ${ex.done ? "done" : ""}">${ex.done ? "Done" : "Pending"}</span>
           </div>
         `;
+
+        if (idx === currentIndex) row.classList.add("current");
+        if (ex.done) row.classList.add("completed");
         listEl.appendChild(row);
       });
     }
 
     function updateUI() {
       const total = exercises.length;
-      const doneCount = exercises.filter(e => e.done).length;
+      const doneCount = exercises.filter((e) => e.done).length;
+
       progressText.textContent = `${doneCount} / ${total} done`;
-      const percent = total ? (doneCount / total) * 100 : 0;
-      progressFill.style.width = percent + "%";
+      progressFill.style.width = total ? `${(doneCount / total) * 100}%` : "0%";
 
       if (currentIndex >= 0 && currentIndex < total) {
-        currentLabel.textContent = `Current: ${exercises[currentIndex].name}`;
+        currentLabel.textContent = `Current: ${exercises[currentIndex].name || "Exercise"}`;
         markDoneBtn.disabled = false;
       } else {
         currentLabel.textContent = "Current: —";
         markDoneBtn.disabled = true;
       }
 
-      // highlight current
-      [...listEl.children].forEach((row, idx) => {
-        row.classList.toggle("current", idx === currentIndex);
-        row.classList.toggle("completed", exercises[idx]?.done);
-      });
+      renderList();
     }
 
-    function startSession() {
-      exercises = sampleExercises.map(e => ({ ...e, done: false }));
-      currentIndex = exercises.length ? 0 : -1;
-      renderList();
-      updateUI();
-    }
+    async function loadLiveData() {
+      try {
+        if (!token) {
+          exercises = sampleExercises.map((ex) => ({ ...ex, done: false }));
+          currentIndex = exercises.length ? 0 : -1;
+          updateUI();
+          return;
+        }
 
-    function restartSession() {
-      exercises.forEach(e => (e.done = false));
-      currentIndex = exercises.length ? 0 : -1;
-      renderList();
-      updateUI();
+        const res = await fetch("http://localhost:4000/api/live-session", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error || "Failed to load live session");
+          return;
+        }
+
+        exercises = (data.exercises || []).map((ex) => ({ ...ex, done: false }));
+        currentIndex = exercises.length ? 0 : -1;
+        updateUI();
+      } catch (err) {
+        alert("Server error while loading live session");
+      }
     }
 
     function markDone() {
       if (currentIndex < 0) return;
       exercises[currentIndex].done = true;
       currentIndex = currentIndex + 1 < exercises.length ? currentIndex + 1 : -1;
-      renderList();
       updateUI();
     }
 
-    startBtn.onclick = startSession;
-    restartBtn.onclick = restartSession;
-    markDoneBtn.onclick = markDone;
-
-    // Auto-start with empty state shown; user clicks "Start Session" to load sample
-  </script>
-  <script>
-  const token = localStorage.getItem("token");
-  const listEl = document.getElementById("exercise-list");
-  const currentLabel = document.getElementById("current-ex-label");
-  const progressText = document.getElementById("progress-text");
-  const progressFill = document.getElementById("progress-fill");
-  const markDoneBtn = document.getElementById("mark-done-btn");
-  const startBtn = document.getElementById("start-btn");
-  const restartBtn = document.getElementById("restart-btn");
-
-  let exercises = [];
-  let currentIndex = -1;
-
-  async function loadLiveData() {
-    try {
-      const res = await fetch("http://localhost:4000/api/live-session", {
-        headers: { Authorization: `Bearer ${token}` }
+    function restartSession() {
+      exercises.forEach((ex) => {
+        ex.done = false;
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.error || "Failed to load live session");
-        return;
-      }
-
-      exercises = data.exercises.map(ex => ({ ...ex, done: false }));
       currentIndex = exercises.length ? 0 : -1;
-      renderList();
       updateUI();
-    } catch (err) {
-      alert("Server error while loading live session");
-    }
-  }
-
-  function renderList() {
-    listEl.innerHTML = "";
-
-    exercises.forEach((ex, idx) => {
-      const row = document.createElement("div");
-      row.className = "exercise-row";
-
-      row.innerHTML = `
-        <div class="left">
-          <div class="title">${ex.day ? ex.day + " - " : ""}${ex.name || "Exercise"}</div>
-          <div class="meta">${ex.sets || ""} ${ex.reps || ""} ${ex.type ? "• " + ex.type : ""}</div>
-        </div>
-        <div class="right">
-          <span class="status ${ex.done ? "done" : ""}">${ex.done ? "Done" : "Pending"}</span>
-        </div>
-      `;
-
-      if (idx === currentIndex) row.classList.add("current");
-      if (ex.done) row.classList.add("completed");
-      listEl.appendChild(row);
-    });
-  }
-
-  function updateUI() {
-    const total = exercises.length;
-    const doneCount = exercises.filter(e => e.done).length;
-
-    progressText.textContent = `${doneCount} / ${total} done`;
-    progressFill.style.width = total ? `${(doneCount / total) * 100}%` : "0%";
-
-    if (currentIndex >= 0 && currentIndex < total) {
-      currentLabel.textContent = `Current: ${exercises[currentIndex].name}`;
-      markDoneBtn.disabled = false;
-    } else {
-      currentLabel.textContent = "Current: —";
-      markDoneBtn.disabled = true;
     }
 
-    renderList();
-  }
-
-  function markDone() {
-    if (currentIndex < 0) return;
-    exercises[currentIndex].done = true;
-    currentIndex = currentIndex + 1 < exercises.length ? currentIndex + 1 : -1;
-    updateUI();
-  }
-
-  function restartSession() {
-    exercises.forEach(ex => ex.done = false);
-    currentIndex = exercises.length ? 0 : -1;
-    updateUI();
-  }
-
-  startBtn.addEventListener("click", loadLiveData);
-  restartBtn.addEventListener("click", restartSession);
-  markDoneBtn.addEventListener("click", markDone);
-</script>
+    startBtn.addEventListener("click", loadLiveData);
+    restartBtn.addEventListener("click", restartSession);
+    markDoneBtn.addEventListener("click", markDone);
+  </script>
 </body>
 </html>
