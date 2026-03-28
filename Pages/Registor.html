@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Workout Plan</title>
+    <link rel="stylesheet" href="shared.css">
+</head>
+<body>
+    <div class="card">
+        <h2>Welcome Back!</h2>
+        <p>Login to view your workout plan.</p>
+        <form action="Schedule.html">
+            <input type="text" placeholder="Username" required>
+            <input type="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p style="text-align: center; margin-top: 15px;">
+            <a href="forgotpass.html" style="color: var(--primary-color);">Forgot Password?</a><br><br>
+            Don't have an account? <a href="Registor.html" style="color: var(--primary-color);">Register</a>
+        </p>
+    </div>
+    <script>
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const age = document.getElementById("age").value.trim();
+    const gender = document.getElementById("gender").value;
+    const gym_id = document.getElementById("gym_id").value.trim();
+
+    try {
+      const res = await fetch("http://localhost:4000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, username, password, age, gender, gym_id })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Registration failed");
+        return;
+      }
+
+      alert("Registered successfully. Please login.");
+      window.location.href = "Login.html";
+    } catch (err) {
+      alert("Server error. Please try again.");
+    }
+  });
+</script>
+</body>
+</html>

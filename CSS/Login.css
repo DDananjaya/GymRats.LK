@@ -1,0 +1,84 @@
+/* Base Variables - Default Men/Neutral (Pastel Blue) */
+:root {
+  --bg-color: #f0f4f8;
+  --card-bg: #ffffff;
+  --primary-color: #a0c4ff;
+  --text-color: #333333;
+  --btn-hover: #8ab6ff;
+  --shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+/* Women Theme (Pastel Pink) - Can be triggered by JS */
+[data-theme="women"] {
+  --bg-color: #fcf0f4;
+  --primary-color: #ffb5a7;
+  --btn-hover: #ffa593;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  transition: background-color 0.5s ease;
+}
+
+.card {
+  background-color: var(--card-bg);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  width: 90%;
+  max-width: 400px;
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h2 { text-align: center; margin-bottom: 5px; }
+p { text-align: center; color: #666; margin-bottom: 20px; }
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 8px var(--primary-color);
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--btn-hover);
+  transform: translateY(-2px);
+}
+
+a { text-decoration: none; font-weight: bold; }
+a:hover { text-decoration: underline; }

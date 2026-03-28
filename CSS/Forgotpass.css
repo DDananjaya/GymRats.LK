@@ -1,0 +1,22 @@
+@import url('Login.css');
+
+.card {
+  max-width: 400px;
+}
+
+.card p {
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+/* Special styling for the Gym ID input to make it stand out */
+input[type="number"] {
+  background-color: #fafafa;
+  border-left: 4px solid var(--primary-color);
+}
+
+input[type="number"]:focus {
+  background-color: #fff;
+}
+
+

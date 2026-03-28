@@ -1,0 +1,75 @@
+const db = require("./db");
+const { asyncHandler } = require("./middleware");
+
+async function getSchedule(req, res) {
+  const userId = req.userId;
+
+  const days = await db.all(
+    `SELECT id, day_name FROM schedules WHERE user_id = ? ORDER BY id`,
+    [userId]
+  );
+
+  const result = [];
+  for (const d of days) {
+    const exercises = await db.all(
+      `SELECT id, name, sets, reps, type FROM exercises WHERE schedule_id = ? ORDER BY position, id`,
+      [d.id]
+    );
+
+    result.push({
+      id: d.id,
+      day_name: d.day_name,
+      exercises
+    });
+  }
+
+  res.json({ days: result });
+}
+
+async function saveSchedule(req, res) {
+  const userId = req.userId;
+  const { days } = req.body;
+
+  if (!Array.isArray(days)) {
+    return res.status(400).json({ error: "days must be an array" });
+  }
+
+  await db.run(`DELETE FROM exercises WHERE schedule_id IN (SELECT id FROM schedules WHERE user_id = ?)`, [userId]);
+  await db.run(`DELETE FROM schedules WHERE user_id = ?`, [userId]);
+
+  for (const day of days) {
+    const dayName = (day.day_name || "").trim();
+    if (!dayName) continue;
+
+    const savedDay = await db.run(
+      `INSERT INTO schedules (user_id, day_name) VALUES (?, ?)`,
+      [userId, dayName]
+    );
+
+    const scheduleId = savedDay.id;
+    const exercises = Array.isArray(day.exercises) ? day.exercises : [];
+
+    for (let i = 0; i < exercises.length; i++) {
+      const ex = exercises[i];
+      await db.run(
+        `INSERT INTO exercises (schedule_id, name, sets, reps, type, position)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          scheduleId,
+          (ex.name || "").trim(),
+          ex.sets || "",
+          ex.reps || "",
+          ex.type || "",
+          i
+        ]
+      );
+    }
+  }
+
+  res.json({ message: "Schedule saved successfully" });
+}
+
+module.exports = {
+  getScheduleRoute: asyncHandler(getSchedule),
+  saveScheduleRoute: asyncHandler(saveSchedule)
+};

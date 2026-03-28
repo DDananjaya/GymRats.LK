@@ -1,0 +1,77 @@
+@import url('Login.css');
+
+/* Make the schedule card much wider to fit the workout data */
+.card {
+  max-width: 800px;
+  width: 95%;
+  padding: 30px;
+}
+
+.workout-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  flex-wrap: wrap;
+  transition: transform 0.2s ease;
+}
+
+.workout-row:hover {
+  transform: scale(1.01);
+  border-color: var(--primary-color);
+}
+
+.workout-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text-color);
+  flex: 1;
+  min-width: 150px;
+}
+
+.workout-details {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.workout-details label {
+  font-size: 14px;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.workout-details input[type="number"] {
+  width: 60px;
+  padding: 8px;
+  margin: 0;
+  text-align: center;
+}
+
+.workout-details select {
+  width: 110px;
+  padding: 8px;
+  margin: 0;
+}
+
+/* Responsive adjustments for mobile phones */
+@media (max-width: 600px) {
+  .workout-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .workout-details {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
