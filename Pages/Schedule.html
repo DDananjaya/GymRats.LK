@@ -1,75 +1,639 @@
-const db = require("./db");
-const { asyncHandler } = require("./middleware");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-async function getSchedule(req, res) {
-  const userId = req.userId;
+    <title>Workout Schedule – GymRats LK</title>
 
-  const days = await db.all(
-    `SELECT id, day_name FROM schedules WHERE user_id = ? ORDER BY id`,
-    [userId]
-  );
+    <link rel="stylesheet" href="styles.css">
 
-  const result = [];
-  for (const d of days) {
-    const exercises = await db.all(
-      `SELECT id, name, sets, reps, type FROM exercises WHERE schedule_id = ? ORDER BY position, id`,
-      [d.id]
-    );
+    <style>
+        .dashboard-layout { background: #f4f7fa; }
+        .main-content { max-width: 1000px; padding: 20px 30px 60px; }
 
-    result.push({
-      id: d.id,
-      day_name: d.day_name,
-      exercises
-    });
-  }
+        .card {
+            max-width: 100%;
+            padding: 0;
+            background: #fff;
+            border: 1px solid #e0e5eb;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
 
-  res.json({ days: result });
-}
+        .day-header {
+            padding: 20px 25px 15px;
+            border-bottom: 1px solid #f0f3f7;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-async function saveSchedule(req, res) {
-  const userId = req.userId;
-  const { days } = req.body;
+        .day-label-input {
+            background: #fff;
+            border: 1px solid #e0e5eb;
+            color: #333;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: bold;
+            flex: 1;
+            font-size: 16px;
+        }
 
-  if (!Array.isArray(days)) {
-    return res.status(400).json({ error: "days must be an array" });
-  }
+        .ex-list { padding: 10px 25px 20px; }
 
-  await db.run(`DELETE FROM exercises WHERE schedule_id IN (SELECT id FROM schedules WHERE user_id = ?)`, [userId]);
-  await db.run(`DELETE FROM schedules WHERE user_id = ?`, [userId]);
+        .labels-row {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #778ca2;
+            padding: 15px 0 8px;
+            border-bottom: 1px solid #f0f3f7;
+        }
 
-  for (const day of days) {
-    const dayName = (day.day_name || "").trim();
-    if (!dayName) continue;
+        .ex-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 8px 0;
+        }
 
-    const savedDay = await db.run(
-      `INSERT INTO schedules (user_id, day_name) VALUES (?, ?)`,
-      [userId, dayName]
-    );
+        .ex-row input,
+        .ex-row select {
+            width: 100%;
+            border: 1px solid #e0e5eb;
+            border-radius: 8px;
+            padding: 12px;
+        }
 
-    const scheduleId = savedDay.id;
-    const exercises = Array.isArray(day.exercises) ? day.exercises : [];
+        .btn-remove-day {
+            color: #ed5f5f;
+        }
 
-    for (let i = 0; i < exercises.length; i++) {
-      const ex = exercises[i];
-      await db.run(
-        `INSERT INTO exercises (schedule_id, name, sets, reps, type, position)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          scheduleId,
-          (ex.name || "").trim(),
-          ex.sets || "",
-          ex.reps || "",
-          ex.type || "",
-          i
-        ]
-      );
+        .btn-add-ex {
+            width: 100%;
+            text-align: center;
+            color: #38bdf8;
+            border: 1px dashed rgba(56, 189, 248, 0.3);
+            padding: 14px;
+            margin-top: 15px;
+        }
+
+        .btn-remove-ex {
+            width: 42px;
+            height: 42px;
+        }
+
+        #userAvatar { color: #fff; }
+
+    </style>
+</head>
+
+<body class="dashboard-layout">
+
+<header class="site-header">
+
+    <div class="header-left">
+
+        <span style="font-size:1.4rem;">🏋️</span>
+
+        <div class="brand">
+            GymRats<span>LK</span>
+        </div>
+
+        <nav class="nav-links">
+            <a href="Schedule.html" class="nav-link active">
+                📅 Schedule
+            </a>
+
+            <a href="LiveSession.html" class="nav-link">
+                🔴 Live Sessions
+            </a>
+        </nav>
+
+    </div>
+
+    <div class="header-right">
+
+        <div class="user-avatar" id="userAvatar">?</div>
+
+        <span id="userName" style="display:none;"></span>
+
+        <button class="btn btn-logout" id="logoutBtn">
+            Sign Out
+        </button>
+
+    </div>
+
+</header>
+
+<main class="main-content">
+
+    <div class="page-title"
+         style="display:flex;justify-content:space-between;margin-bottom:25px;">
+
+        <div>
+
+            <h2>Workout Builder</h2>
+            <p>Organize your routine by days</p>
+
+        </div>
+
+        <div>
+
+            <button id="add-day">
+                + Add Day
+            </button>
+
+            <button id="save-all">
+                💾 Save Schedule
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="days-container"></div>
+
+</main>
+
+<!-- Day Template -->
+
+<template id="day-template">
+
+    <section class="card">
+
+        <div class="day-header">
+
+            <input
+                    class="day-label-input"
+                    type="text"
+                    placeholder="e.g. Chest Day"
+            />
+
+            <button
+                    class="btn-sm btn-remove-day remove-day-btn">
+                Remove Day
+            </button>
+
+        </div>
+
+        <div class="ex-list">
+
+            <div class="labels-row">
+
+                <div style="flex:1;">Exercise</div>
+                <div style="width:90px;">Sets</div>
+                <div style="width:90px;">Reps</div>
+                <div style="width:140px;">Type</div>
+                <div style="width:42px;"></div>
+
+            </div>
+
+            <div class="exercise-rows-container"></div>
+
+            <button class="btn-add-ex">
+                + Add Exercise
+            </button>
+
+        </div>
+
+    </section>
+
+</template>
+
+<!-- Exercise Template -->
+
+<template id="ex-template">
+
+    <div class="ex-row">
+
+        <div style="flex:1;">
+            <input class="ex-name"
+                   type="text"
+                   placeholder="Exercise Name"/>
+        </div>
+
+        <div style="width:90px;">
+            <input class="ex-sets"
+                   type="number"
+                   placeholder="3"/>
+        </div>
+
+        <div style="width:90px;">
+            <input class="ex-reps"
+                   type="text"
+                   placeholder="12"/>
+        </div>
+
+        <div style="width:140px;">
+
+            <select class="ex-type">
+
+                <option value="Strength">
+                    Strength
+                </option>
+
+                <option value="Cardio">
+                    Cardio
+                </option>
+
+                <option value="Mobility">
+                    Mobility
+                </option>
+
+            </select>
+
+        </div>
+
+        <div style="width:42px;">
+
+            <button
+                    class="btn-remove-ex remove-ex-btn">
+                ✕
+            </button>
+
+        </div>
+
+    </div>
+
+</template>
+
+<script>
+
+    /* ===============================
+       AUTH CHECK
+    ================================ */
+
+    const token = localStorage.getItem('gr_token');
+    const userRaw = localStorage.getItem('gr_user');
+
+    if (!token) {
+        window.location.href = 'Login.html';
     }
-  }
 
-  res.json({ message: "Schedule saved successfully" });
-}
+    /* ===============================
+       SAFE USER PARSE (NEW)
+    ================================ */
 
-module.exports = {
-  getScheduleRoute: asyncHandler(getSchedule),
-  saveScheduleRoute: asyncHandler(saveSchedule)
-};
+    let currentUser = {};
+
+    try {
+        currentUser = JSON.parse(userRaw) || {};
+    }
+    catch {
+        currentUser = {};
+    }
+
+    if (currentUser.name) {
+
+        document.getElementById('userName').textContent =
+            currentUser.name;
+
+        document.getElementById('userName').style.display =
+            'inline-block';
+
+        document.getElementById('userAvatar').textContent =
+            currentUser.name.charAt(0).toUpperCase();
+
+    }
+
+    /* ===============================
+       LOGOUT
+    ================================ */
+
+    document.getElementById('logoutBtn').onclick = () => {
+
+        localStorage.clear();
+
+        window.location.href = 'Login.html';
+
+    };
+
+    /* ===============================
+       VARIABLES
+    ================================ */
+
+    const API_URL =
+        'http://localhost:4000/api/schedules';
+
+    const daysContainer =
+        document.getElementById('days-container');
+
+    const dayTpl =
+        document.getElementById('day-template');
+
+    const exTpl =
+        document.getElementById('ex-template');
+
+    /* ===============================
+       BUTTON EVENTS
+    ================================ */
+
+    document.getElementById('add-day')
+        .onclick = () => addDay();
+
+    document.getElementById('save-all')
+        .onclick = saveSchedule;
+
+    /* ===============================
+       ADD DAY
+    ================================ */
+
+    function addDay(data = {}) {
+
+        const node =
+            dayTpl.content.cloneNode(true);
+
+        const section =
+            node.querySelector('.card');
+
+        const nameInput =
+            node.querySelector('.day-label-input');
+
+        const rowsContainer =
+            node.querySelector('.exercise-rows-container');
+
+        nameInput.value =
+            data.day_name || '';
+
+        if (
+            data.exercises &&
+            data.exercises.length > 0
+        ) {
+
+            data.exercises.forEach(ex =>
+                addExercise(rowsContainer, ex)
+            );
+
+        }
+        else {
+
+            addExercise(rowsContainer);
+
+        }
+
+        node.querySelector('.btn-add-ex')
+            .onclick =
+            () => addExercise(rowsContainer);
+
+        /* CONFIRM DELETE (NEW) */
+
+        node.querySelector('.remove-day-btn')
+            .onclick = () => {
+
+            if (confirm("Remove this day?")) {
+
+                section.remove();
+
+            }
+
+        };
+
+        daysContainer.appendChild(node);
+
+    }
+
+    /* ===============================
+       ADD EXERCISE
+    ================================ */
+
+    function addExercise(container, data = {}) {
+
+        const rowNode =
+            exTpl.content.cloneNode(true);
+
+        const rowDiv =
+            rowNode.querySelector('.ex-row');
+
+        rowDiv.querySelector('.ex-name').value =
+            data.name || '';
+
+        rowDiv.querySelector('.ex-sets').value =
+            data.sets || '';
+
+        rowDiv.querySelector('.ex-reps').value =
+            data.reps || '';
+
+        rowDiv.querySelector('.ex-type').value =
+            data.type || 'Strength';
+
+        rowDiv.querySelector('.remove-ex-btn')
+            .onclick =
+            () => rowDiv.remove();
+
+        container.appendChild(rowNode);
+
+    }
+
+    /* ===============================
+       COLLECT DATA
+    ================================ */
+
+    function collectWorkoutData() {
+
+        return [...document.querySelectorAll('.card')]
+
+            .map(dayCard => ({
+
+                day_name:
+
+                    dayCard
+                        .querySelector('.day-label-input')
+                        .value.trim(),
+
+                exercises:
+
+                    [...dayCard.querySelectorAll('.ex-row')]
+
+                        .map(row => ({
+
+                            name:
+                                row.querySelector('.ex-name').value.trim(),
+
+                            sets:
+                                row.querySelector('.ex-sets').value.trim(),
+
+                            reps:
+                                row.querySelector('.ex-reps').value.trim(),
+
+                            type:
+                            row.querySelector('.ex-type').value
+
+                        }))
+
+                        .filter(ex => ex.name)
+
+            }))
+
+            .filter(d => d.day_name);
+
+    }
+
+    /* ===============================
+       SAVE SCHEDULE
+    ================================ */
+
+    async function saveSchedule() {
+
+        const btn =
+            document.getElementById('save-all');
+
+        btn.disabled = true;
+
+        btn.textContent = "Saving...";
+
+        const workoutData = {
+
+            days: collectWorkoutData()
+
+        };
+
+        /* VALIDATION (NEW) */
+
+        if (workoutData.days.length === 0) {
+
+            alert("Add at least one workout day!");
+
+            btn.disabled = false;
+
+            btn.textContent =
+                "💾 Save Schedule";
+
+            return;
+
+        }
+
+        try {
+
+            const response = await fetch(
+                API_URL,
+                {
+
+                    method: 'POST',
+
+                    headers: {
+
+                        'Content-Type':
+                            'application/json',
+
+                        'Authorization':
+                            `Bearer ${token}`
+
+                    },
+
+                    body:
+                        JSON.stringify(workoutData)
+
+                }
+
+            );
+
+            if (response.ok) {
+
+                alert(
+                    "Schedule saved successfully! ✅"
+                );
+
+            }
+            else {
+
+                const errorResult =
+                    await response.json();
+
+                alert(
+                    "Error: " +
+                    (errorResult.error ||
+                        "Failed to save")
+                );
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Network Error:",
+                error
+            );
+
+            alert(
+                "Network error. Is backend running?"
+            );
+
+        }
+        finally {
+
+            btn.disabled = false;
+
+            btn.textContent =
+                "💾 Save Schedule";
+
+        }
+
+    }
+
+    /* ===============================
+       LOAD SCHEDULE
+    ================================ */
+
+    async function loadSchedule() {
+
+        try {
+
+            const res =
+                await fetch(
+                    API_URL,
+                    {
+                        headers: {
+                            'Authorization':
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+            if (!res.ok)
+                throw new Error("Load failed");
+
+            const data =
+                await res.json();
+
+            daysContainer.innerHTML = '';
+
+            if (
+                !data.days ||
+                data.days.length === 0
+            ) {
+
+                addDay();
+
+            }
+            else {
+
+                data.days.forEach(addDay);
+
+            }
+
+        }
+        catch (err) {
+
+            console.error("Load Error:", err);
+
+            addDay();
+
+        }
+
+    }
+
+    /* ===============================
+       INITIAL LOAD
+    ================================ */
+
+    loadSchedule();
+
+</script>
+
+</body>
+</html>

@@ -1,25 +1,26 @@
 function asyncHandler(fn) {
-  return (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-  };
+    return (req, res, next) => {
+        Promise.resolve(fn(req, res, next)).catch(next);
+    };
 }
 
 function errorHandler(err, req, res, next) {
-  console.error("Error:", err);
+    console.error(err);
 
-  if (err.code === "SQLITE_CONSTRAINT") {
-    return res.status(409).json({
-      error: "Username or Gym ID already exists",
-    });
-  }
+    const message = err?.message || 'Internal Server Error';
 
-  if (err.message && err.message.includes("not found")) {
-    return res.status(404).json({ error: err.message });
-  }
+    if (message.includes('UNIQUE constraint failed') || err?.code === 'SQLITE_CONSTRAINT') {
+        return res.status(409).json({ error: 'Username or Gym ID already exists' });
+    }
 
-  res.status(err.status || 500).json({
-    error: err.message || "Internal Server Error",
-  });
+    if (err?.status) {
+        return res.status(err.status).json({ error: message });
+    }
+
+    return res.status(500).json({ error: message });
 }
 
-module.exports = { asyncHandler, errorHandler };
+module.exports = {
+    asyncHandler,
+    errorHandler,
+};

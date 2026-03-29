@@ -1,23 +1,32 @@
 {
-  "name": "gymrats",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "name": "gymrats-lk",
+  "version": "2.0.0",
+  "description": "Cleaned full-stack GymRats LK workout planner",
+  "main": "server.js",
   "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "db:init": "node db-init.js",
+    "db:migrate": "node migrate.js",
+    "test": "node -e \"console.log('No automated tests configured')\""
+  },
+  "keywords": [
+    "gym",
+    "workout",
+    "schedule",
+    "express",
+    "turso",
+    "libsql"
+  ],
+  "license": "MIT",
   "dependencies": {
     "@libsql/client": "^0.17.2",
-    "bcrypt": "^6.0.0",
-    "cors": "^2.8.6",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-validator": "^7.3.1",
-    "jsonwebtoken": "^9.0.3",
-    "sqlite3": "^6.0.1"
+    "jsonwebtoken": "^9.0.2"
   }
 }

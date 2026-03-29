@@ -3,51 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Workout Plan</title>
-    <link rel="stylesheet" href="shared.css">
+    <title>Login - GymRats LK</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div class="card">
-        <h2>Welcome Back!</h2>
-        <p>Login to view your workout plan.</p>
-        <form action="Schedule.html">
-            <input type="text" placeholder="Username" required>
-            <input type="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
-        <p style="text-align: center; margin-top: 15px;">
-            <a href="forgotpass.html" style="color: var(--primary-color);">Forgot Password?</a><br><br>
-            Don't have an account? <a href="Registor.html" style="color: var(--primary-color);">Register</a>
-        </p>
+<body class="auth-page">
+<div class="card">
+    <h2>Welcome back</h2>
+    <p>Sign in to manage your workout schedule.</p>
+
+    <div id="alert" class="alert error"></div>
+
+    <form id="loginForm" class="form-grid">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+
+    <div class="helper-text">
+        <a href="Forgotpass.html">Forgot password?</a>
+        <br><br>
+        Don't have an account? <a href="Registor.html">Register</a>
     </div>
-    <script>
-  document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+</div>
 
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
+<script>
+    const API_BASE = 'http://localhost:4000';
+    const alertBox = document.getElementById('alert');
 
-    try {
-      const res = await fetch("http://localhost:4000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.error || "Login failed");
-        return;
-      }
-
-      localStorage.setItem("token", data.token);
-      window.location.href = "Schedule.html";
-    } catch (err) {
-      alert("Server error. Please try again.");
+    function showError(message) {
+        alertBox.textContent = message;
+        alertBox.className = 'alert error show';
     }
-  });
+
+    document.getElementById('loginForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        alertBox.className = 'alert error';
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch(`${API_BASE}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                showError(data.error || 'Login failed');
+                return;
+            }
+
+            localStorage.setItem('gr_token', data.token);
+            localStorage.setItem('gr_user', JSON.stringify(data.user || {}));
+            if (data.user?.gender === 'female') {
+                localStorage.setItem('gr_theme', 'women');
+            } else {
+                localStorage.removeItem('gr_theme');
+            }
+
+            window.location.href = 'Schedule.html';
+        } catch (error) {
+            showError('Could not reach the server at http://localhost:4000');
+        }
+    });
 </script>
 </body>
 </html>
-
