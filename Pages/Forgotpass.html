@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="../Photos/GymRats.png">
+    <link rel="icon" href="Photos/GymRats.png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Forgot Password - GymRats LK</title>
+    <title>GymRats LK • Reset Password</title>
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="auth-layout">
@@ -16,7 +16,7 @@
 
             <div class="auth-hero" style="margin-top: 22px;">
                 <div class="auth-logo-panel">
-                    <img src="../Photos/GymRats.png" alt="GymRats LK Logo" />
+                    <img src="Photos/GymRats.png" alt="GymRats LK Logo" />
                     <div>
                         <div class="brand-title">GymRats<span>LK</span></div>
                         <div class="brand-subtitle">Quick account recovery</div>
@@ -56,7 +56,7 @@
     <section class="auth-panel">
         <div class="auth-card">
             <div class="auth-top">
-                <img class="mini-logo" src="../Photos/GymRats.png" alt="GymRats LK Logo" />
+                <img class="mini-logo" src="Photos/GymRats.png" alt="GymRats LK Logo" />
                 <h2>Reset Password</h2>
                 <p>Enter your username, Gym ID, and a new password.</p>
             </div>
@@ -79,6 +79,8 @@
 </div>
 
 <script>
+    const API_BASE = "https://gymrats-lk.onrender.com";
+
     document.getElementById("forgotForm").addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -98,7 +100,7 @@
         }
 
         try {
-            const res = await fetch("http://localhost:4000/api/auth/forgot-password", {
+            const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, gym_id, new_password })
@@ -114,7 +116,7 @@
             alert("Password updated successfully. Please login.");
             window.location.href = "Login.html";
         } catch (err) {
-            alert("Server error. Please ensure your backend is running on localhost:4000.");
+            alert("Server error. Please try again in a few seconds.");
         }
     });
 </script>
