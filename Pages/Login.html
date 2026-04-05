@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - GymRats LK</title>
-    <link rel="icon" href="../Photos/GymRats.png">
+    <title>GymRats LK • Login</title>
+    <link rel="icon" href="Photos/GymRats.png">
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="auth-layout">
@@ -16,7 +16,7 @@
 
             <div class="auth-hero" style="margin-top: 22px;">
                 <div class="auth-logo-panel">
-                    <img src="../Photos/GymRats.png" alt="GymRats LK Logo" />
+                    <img src="Photos/GymRats.png" alt="GymRats LK Logo" />
                     <div>
                         <div class="brand-title">GymRats<span>LK</span></div>
                         <div class="brand-subtitle">Train smarter. Track better.</div>
@@ -56,7 +56,7 @@
     <section class="auth-panel">
         <div class="auth-card">
             <div class="auth-top">
-                <img class="mini-logo" src="../Photos/GymRats.png" alt="GymRats LK Logo" />
+                <img class="mini-logo" src="Photos/GymRats.png" alt="GymRats LK Logo" />
                 <h2>Welcome Back!</h2>
                 <p>Login to view your workout plan.</p>
             </div>
@@ -78,6 +78,8 @@
 </div>
 
 <script>
+    const API_BASE = "https://gymrats-lk.onrender.com";
+
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -85,7 +87,7 @@
         const password = document.getElementById("password").value.trim();
 
         try {
-       const res = await fetch(`${API_BASE}/api/auth/login`, {
+            const res = await fetch(`${API_BASE}/api/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password }),
@@ -103,7 +105,7 @@
 
             window.location.href = "Schedule.html";
         } catch (err) {
-            alert("Server error. Please ensure your backend is running on localhost:4000.");
+            alert("Server error. Please try again in a few seconds.");
         }
     });
 </script>
