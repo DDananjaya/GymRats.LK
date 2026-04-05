@@ -22,19 +22,15 @@ const app = express();
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-// auth
 app.post("/api/auth/register", ...registerRoute);
 app.post("/api/auth/login", ...loginRoute);
 app.post("/api/auth/forgot-password", ...forgotPasswordRoute);
 
-// schedules
 app.get("/api/schedules", authGuard, getScheduleRoute);
 app.post("/api/schedules", authGuard, saveScheduleRoute);
 
-// live session
 app.get("/api/live-session", authGuard, getLiveListRoute);
 
-// health
 app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
 });
