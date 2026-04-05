@@ -1,294 +1,539 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <link rel="icon" href="../Photos/GymRats.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Live Session - GymRats LK</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
+
+    <style>
+        .dashboard-layout {
+            display: block;
+            background: var(--bg-color);
+            min-height: 100vh;
+        }
+
+        .main-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            text-align: left;
+        }
+
+        .page-header p {
+            margin: 6px 0 0;
+            text-align: left;
+        }
+
+        .session-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .session-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid #e9eef5;
+        }
+
+        .section-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .timer {
+            font-size: 56px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 10px 0 20px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .button-row button {
+            width: auto;
+            min-width: 120px;
+            margin-top: 0;
+        }
+
+        .now-title {
+            font-size: 34px;
+            font-weight: 800;
+            margin: 5px 0 10px;
+        }
+
+        .now-meta {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-bottom: 14px;
+        }
+
+        .progress-text {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-wrap {
+            width: 100%;
+            height: 14px;
+            background: #edf2f7;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary-color);
+            border-radius: 999px;
+            transition: width 0.25s ease;
+        }
+
+        .day-select {
+            min-width: 220px;
+            margin: 0;
+        }
+
+        .checklist-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid #e9eef5;
+        }
+
+        .exercise-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 18px;
+            border: 1px solid #eef2f7;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .exercise-item.active {
+            border-color: var(--primary-color);
+            background: rgba(160, 196, 255, 0.12);
+        }
+
+        .exercise-item.completed {
+            opacity: 0.65;
+            background: #f8fafc;
+        }
+
+        .exercise-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .check-circle {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-color);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .exercise-item.completed .check-circle {
+            background: var(--primary-color);
+        }
+
+        .exercise-item.completed .check-circle::after {
+            content: "✓";
+            position: absolute;
+            left: 4px;
+            top: -1px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .exercise-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .exercise-meta {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .status-pill {
+            background: var(--secondary-bg);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            min-width: 72px;
+            text-align: center;
+        }
+
+        .status-pill.active {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .status-pill.done {
+            background: #d9f5df;
+            color: #2e7d32;
+        }
+
+        @media (max-width: 900px) {
+            .session-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .exercise-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
+
 <body class="dashboard-layout">
+
 <header class="site-header">
-    <div class="site-header-inner">
-        <div>
-            <div class="brand">GymRats LK</div>
-            <nav class="nav-links">
-                <a class="nav-link" href="Schedule.html">Schedule</a>
-                <a class="nav-link active" href="LiveSession.html">Live Session</a>
-            </nav>
-        </div>
-        <div class="header-right">
-            <div class="user-avatar" id="userAvatar">?</div>
-            <div>
-                <div id="userName">Member</div>
-                <div class="muted small">Training Mode</div>
+    <div class="header-left">
+        <a href="Schedule.html" class="brand-wrap">
+            <img src="../Photos/GymRats.png" alt="GymRats LK Logo" class="brand-logo" />
+            <div class="brand-text">
+                <div class="brand-title">GymRats<span>LK</span></div>
+                <div class="brand-subtitle">Live training mode</div>
             </div>
-            <button id="logoutBtn" class="btn-secondary">Logout</button>
-        </div>
+        </a>
+
+        <nav class="nav-links">
+            <a href="Schedule.html" class="nav-link">📅 Schedule</a>
+            <a href="LiveSession.html" class="nav-link active">🔴 Live Sessions</a>
+        </nav>
+    </div>
+
+    <div class="header-right">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span id="userName" style="display:none;"></span>
+        <button class="btn btn-logout" id="logoutBtn">Sign Out</button>
     </div>
 </header>
 
-<main class="main-content stack">
-    <section class="panel">
-        <div class="panel-body">
-            <div class="section-header" style="margin-bottom: 0;">
-                <div>
-                    <span class="pill">Session Timer</span>
-                    <div class="timer" id="sessionClock">00:00</div>
-                    <div class="actions-inline">
-                        <button id="startBtn">Start</button>
-                        <button id="pauseBtn" class="btn-secondary">Pause</button>
-                        <button id="resetBtn" class="btn-secondary">Reset</button>
-                    </div>
-                </div>
-                <div style="min-width: 260px;">
-                    <label class="small muted" for="dayPicker">Workout day</label>
-                    <select id="dayPicker"></select>
-                    <div style="margin-top: 12px;" class="muted small" id="currentMeta">Choose a workout day to begin.</div>
-                </div>
-            </div>
+<main class="main-content">
+
+    <div class="page-header">
+        <div>
+            <h2>Live Session</h2>
+            <p>Track your workout in real time</p>
         </div>
+
+        <div class="button-row">
+            <select id="day-picker" class="day-select">
+                <option>Loading...</option>
+            </select>
+            <button class="btn-outline" id="reload">⟳ Reload</button>
+        </div>
+    </div>
+
+    <div class="session-grid">
+        <section class="session-card">
+            <div class="section-label">Stopwatch</div>
+            <div class="timer" id="session-clock">00:00</div>
+
+            <div class="button-row">
+                <button id="start">▶ Start</button>
+                <button class="btn-outline" id="pause">⏸ Pause</button>
+                <button class="btn-outline" id="reset">↺ Reset</button>
+            </div>
+        </section>
+
+        <section class="session-card">
+            <div class="section-label">Now Tracking</div>
+            <div class="now-title" id="current-ex-name">–</div>
+            <div class="now-meta" id="current-ex-meta">Sets: –, Reps: –</div>
+
+            <div class="progress-text">
+                Progress: <span id="set-count">0</span> / <span id="total-sets">0</span> Sets
+            </div>
+
+            <div class="progress-bar-wrap">
+                <div class="progress-bar-fill" id="set-progress-fill"></div>
+            </div>
+
+            <div class="button-row">
+                <button id="next-set" style="flex:1;">Log Set (Done)</button>
+                <button class="btn-outline" id="next-ex">Skip</button>
+            </div>
+        </section>
+    </div>
+
+    <section class="checklist-card">
+        <div class="card-title">Workout Checklist</div>
+        <div id="exercise-list"></div>
     </section>
 
-    <section class="panel">
-        <div class="panel-header">
-            <div>
-                <h2 style="margin:0;">Current Exercise</h2>
-                <div class="muted small" id="currentExerciseName">No schedule loaded</div>
-            </div>
-            <div class="actions-inline">
-                <button id="doneSetBtn">Log Set</button>
-                <button id="skipBtn" class="btn-secondary">Skip Exercise</button>
-            </div>
-        </div>
-        <div class="panel-body">
-            <div class="muted" id="progressText">0 / 0 sets completed</div>
-            <progress id="progressBar" max="1" value="0" style="width:100%; margin-top: 10px;"></progress>
-        </div>
-    </section>
-
-    <section class="panel">
-        <div class="panel-header">
-            <h2 style="margin:0;">Checklist</h2>
-            <button id="reloadBtn" class="btn-secondary">Reload</button>
-        </div>
-        <div class="panel-body stack" id="checklist"></div>
-    </section>
 </main>
 
 <script>
-    const API_BASE = 'http://localhost:4000';
-    const token = localStorage.getItem('gr_token');
-    const storedUser = localStorage.getItem('gr_user');
-    const theme = localStorage.getItem('gr_theme');
-
-    if (theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-    }
+    const token = localStorage.getItem("gr_token");
+    const userRaw = localStorage.getItem("gr_user");
 
     if (!token) {
-        window.location.href = 'Login.html';
+        window.location.href = "Login.html";
     }
 
     let currentUser = {};
-    try { currentUser = JSON.parse(storedUser || '{}'); } catch (error) { currentUser = {}; }
-    document.getElementById('userName').textContent = currentUser.name || currentUser.username || 'Member';
-    document.getElementById('userAvatar').textContent = (currentUser.name || currentUser.username || 'M').charAt(0).toUpperCase();
-
-    let scheduleDays = [];
-    let selectedDayIndex = 0;
-    let currentExerciseIndex = 0;
-    let currentSetCount = 0;
-    let intervalId = null;
-    let elapsedSeconds = 0;
-    let completedIndexes = [];
-
-    const dayPicker = document.getElementById('dayPicker');
-    const checklist = document.getElementById('checklist');
-    const currentExerciseName = document.getElementById('currentExerciseName');
-    const currentMeta = document.getElementById('currentMeta');
-    const progressText = document.getElementById('progressText');
-    const progressBar = document.getElementById('progressBar');
-    const sessionClock = document.getElementById('sessionClock');
-
-    function formatTime(totalSeconds) {
-        const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-        const seconds = String(totalSeconds % 60).padStart(2, '0');
-        return `${minutes}:${seconds}`;
+    try {
+        currentUser = JSON.parse(userRaw) || {};
+    } catch {
+        currentUser = {};
     }
 
-    function getCurrentDay() {
-        return scheduleDays[selectedDayIndex] || { exercises: [] };
+    if (currentUser.name) {
+        document.getElementById("userName").textContent = currentUser.name;
+        document.getElementById("userName").style.display = "inline-block";
+        document.getElementById("userAvatar").textContent =
+            currentUser.name.charAt(0).toUpperCase();
     }
 
-    function getCurrentExercise() {
-        return getCurrentDay().exercises?.[currentExerciseIndex] || null;
+    document.getElementById("logoutBtn").onclick = () => {
+        localStorage.clear();
+        window.location.href = "Login.html";
+    };
+
+    const API_BASE = "http://localhost:4000";
+    const API = { get: `${API_BASE}/api/live-session` };
+
+    let schedule = [];
+    let currentDayIndex = 0;
+    let currentExIndex = 0;
+    let currentSet = 0;
+    let sessionInterval = null;
+    let elapsedSec = 0;
+    let completedEx = [];
+
+    const dayPicker = document.getElementById("day-picker");
+    const exerciseList = document.getElementById("exercise-list");
+    const currentExName = document.getElementById("current-ex-name");
+    const currentExMeta = document.getElementById("current-ex-meta");
+    const clock = document.getElementById("session-clock");
+    const setCountText = document.getElementById("set-count");
+    const totalSetsText = document.getElementById("total-sets");
+    const progressFill = document.getElementById("set-progress-fill");
+
+    document.getElementById("start").onclick = startTimer;
+    document.getElementById("pause").onclick = pauseTimer;
+    document.getElementById("reset").onclick = resetTimer;
+    document.getElementById("reload").onclick = loadSchedule;
+    document.getElementById("next-set").onclick = logSet;
+    document.getElementById("next-ex").onclick = skipExercise;
+
+    dayPicker.onchange = () => {
+        currentDayIndex = dayPicker.selectedIndex;
+        resetSessionState();
+        renderExercises();
+    };
+
+    function startTimer() {
+        if (sessionInterval) return;
+
+        sessionInterval = setInterval(() => {
+            elapsedSec++;
+            clock.textContent = formatTime(elapsedSec);
+        }, 1000);
     }
 
-    function resetWorkoutState() {
-        currentExerciseIndex = 0;
-        currentSetCount = 0;
-        completedIndexes = [];
+    function pauseTimer() {
+        clearInterval(sessionInterval);
+        sessionInterval = null;
     }
 
-    function renderDayOptions() {
-        dayPicker.innerHTML = '';
-        if (!scheduleDays.length) {
-            const option = document.createElement('option');
-            option.textContent = 'No workout days available';
-            dayPicker.appendChild(option);
-            return;
-        }
-
-        scheduleDays.forEach((day, index) => {
-            const option = document.createElement('option');
-            option.value = String(index);
-            option.textContent = day.day_name || `Day ${index + 1}`;
-            dayPicker.appendChild(option);
-        });
+    function resetTimer() {
+        pauseTimer();
+        elapsedSec = 0;
+        clock.textContent = "00:00";
+        resetSessionState();
+        renderExercises();
     }
 
-    function renderChecklist() {
-        const day = getCurrentDay();
-        const exercises = Array.isArray(day.exercises) ? day.exercises : [];
-        checklist.innerHTML = '';
-
-        exercises.forEach((exercise, index) => {
-            const item = document.createElement('div');
-            const isDone = completedIndexes.includes(index);
-            const isActive = index === currentExerciseIndex && !isDone;
-            item.className = `checklist-item ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`;
-            item.innerHTML = `
-          <div>
-            <div style="font-weight: 700;">${exercise.name}</div>
-            <div class="muted small">${exercise.sets} sets · ${exercise.reps} reps · ${exercise.type}</div>
-          </div>
-          <div class="pill">${isDone ? 'Done' : isActive ? 'Active' : 'Waiting'}</div>
-        `;
-            checklist.appendChild(item);
-        });
-
-        const exercise = getCurrentExercise();
-        if (!exercise) {
-            currentExerciseName.textContent = exercises.length ? 'Workout complete' : 'No exercises for this day';
-            currentMeta.textContent = exercises.length ? 'Great work. You finished this workout.' : 'Create a schedule first.';
-            progressText.textContent = '0 / 0 sets completed';
-            progressBar.max = 1;
-            progressBar.value = 0;
-            document.getElementById('doneSetBtn').disabled = true;
-            document.getElementById('skipBtn').disabled = true;
-            return;
-        }
-
-        const totalSets = Number.parseInt(exercise.sets, 10) || 1;
-        currentExerciseName.textContent = exercise.name;
-        currentMeta.textContent = `${day.day_name} · ${exercise.type} · ${exercise.reps} reps target`;
-        progressText.textContent = `${currentSetCount} / ${totalSets} sets completed`;
-        progressBar.max = totalSets;
-        progressBar.value = currentSetCount;
-        document.getElementById('doneSetBtn').disabled = false;
-        document.getElementById('skipBtn').disabled = false;
+    function resetSessionState() {
+        currentExIndex = 0;
+        currentSet = 0;
+        completedEx = [];
     }
 
-    function moveToNextExercise() {
-        const exercises = getCurrentDay().exercises || [];
-        if (currentExerciseIndex < exercises.length - 1) {
-            currentExerciseIndex += 1;
-            currentSetCount = 0;
-        } else {
-            completedIndexes.push(currentExerciseIndex);
-            currentExerciseIndex = exercises.length;
-            currentSetCount = 0;
-            if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null;
-            }
-            alert('Workout complete. Nice job!');
-        }
-    }
-
-    function logSet() {
-        const exercise = getCurrentExercise();
-        if (!exercise) return;
-        const totalSets = Number.parseInt(exercise.sets, 10) || 1;
-        currentSetCount += 1;
-        if (currentSetCount >= totalSets) {
-            if (!completedIndexes.includes(currentExerciseIndex)) {
-                completedIndexes.push(currentExerciseIndex);
-            }
-            moveToNextExercise();
-        }
-        renderChecklist();
-    }
-
-    function skipExercise() {
-        if (!completedIndexes.includes(currentExerciseIndex)) {
-            completedIndexes.push(currentExerciseIndex);
-        }
-        moveToNextExercise();
-        renderChecklist();
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60).toString().padStart(2, "0");
+        const s = (sec % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
     }
 
     async function loadSchedule() {
         try {
-            const response = await fetch(`${API_BASE}/api/schedules`, {
-                headers: { Authorization: `Bearer ${token}` },
+            const res = await fetch(API.get, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to load schedule');
+
+            if (!res.ok) throw new Error("Failed to load");
+
+            const data = await res.json();
+            schedule = data.days || [];
+
+            dayPicker.innerHTML = "";
+
+            if (schedule.length === 0) {
+                dayPicker.innerHTML = "<option>No Schedules Found</option>";
+                exerciseList.innerHTML = "<p>No workout plan available.</p>";
+                currentExName.textContent = "No workout found";
+                currentExMeta.textContent = "Create a schedule first.";
+                setCountText.textContent = "0";
+                totalSetsText.textContent = "0";
+                progressFill.style.width = "0%";
+                return;
             }
-            scheduleDays = Array.isArray(data.days) ? data.days : [];
-            selectedDayIndex = 0;
-            resetWorkoutState();
-            renderDayOptions();
-            renderChecklist();
-        } catch (error) {
-            scheduleDays = [];
-            renderDayOptions();
-            renderChecklist();
-            alert(error.message || 'Failed to load schedule');
+
+            schedule.forEach((d, i) => {
+                const opt = document.createElement("option");
+                opt.textContent = d.day_name || `Day ${i + 1}`;
+                dayPicker.appendChild(opt);
+            });
+
+            currentDayIndex = 0;
+            resetSessionState();
+            renderExercises();
+        } catch (err) {
+            console.error(err);
+            alert("Error: Make sure you are logged in and the server is running!");
         }
     }
 
-    document.getElementById('startBtn').addEventListener('click', () => {
-        if (intervalId) return;
-        intervalId = setInterval(() => {
-            elapsedSeconds += 1;
-            sessionClock.textContent = formatTime(elapsedSeconds);
-        }, 1000);
-    });
+    function renderExercises() {
+        const day = schedule[currentDayIndex] || { exercises: [] };
+        exerciseList.innerHTML = "";
 
-    document.getElementById('pauseBtn').addEventListener('click', () => {
-        clearInterval(intervalId);
-        intervalId = null;
-    });
+        day.exercises.forEach((ex, idx) => {
+            const isCompleted = completedEx.includes(idx);
+            const isActive = idx === currentExIndex && !isCompleted;
 
-    document.getElementById('resetBtn').addEventListener('click', () => {
-        clearInterval(intervalId);
-        intervalId = null;
-        elapsedSeconds = 0;
-        sessionClock.textContent = '00:00';
-        resetWorkoutState();
-        renderChecklist();
-    });
+            const row = document.createElement("div");
+            row.className = `exercise-item ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`;
 
-    dayPicker.addEventListener('change', (event) => {
-        selectedDayIndex = Number(event.target.value) || 0;
-        resetWorkoutState();
-        renderChecklist();
-    });
+            row.innerHTML = `
+                <div class="exercise-left">
+                    <span class="check-circle"></span>
+                    <div>
+                        <div class="exercise-name">${ex.name}</div>
+                        <div class="exercise-meta">${ex.sets} Sets · ${ex.reps} Reps · ${ex.type}</div>
+                    </div>
+                </div>
+                <div class="status-pill ${isCompleted ? "done" : (isActive ? "active" : "")}">
+                    ${isCompleted ? "Done" : (isActive ? "Active" : "Wait")}
+                </div>
+            `;
 
-    document.getElementById('doneSetBtn').addEventListener('click', logSet);
-    document.getElementById('skipBtn').addEventListener('click', skipExercise);
-    document.getElementById('reloadBtn').addEventListener('click', loadSchedule);
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('gr_token');
-        localStorage.removeItem('gr_user');
-        localStorage.removeItem('gr_theme');
-        window.location.href = 'Login.html';
-    });
+            exerciseList.appendChild(row);
+        });
+
+        const ex = day.exercises[currentExIndex];
+
+        if (ex && !completedEx.includes(currentExIndex)) {
+            currentExName.textContent = ex.name;
+            currentExMeta.textContent = `Target: ${ex.sets} Sets of ${ex.reps}`;
+
+            const totalSets = parseInt(ex.sets) || 1;
+            totalSetsText.textContent = totalSets;
+            setCountText.textContent = currentSet;
+
+            const percent = Math.min((currentSet / totalSets) * 100, 100);
+            progressFill.style.width = `${percent}%`;
+
+            document.getElementById("next-set").disabled = false;
+        } else {
+            currentExName.textContent =
+                completedEx.length === day.exercises.length && day.exercises.length > 0
+                    ? "Workout Finished! 🎉"
+                    : "Ready?";
+            currentExMeta.textContent = "Select a day or start the timer.";
+            setCountText.textContent = "0";
+            totalSetsText.textContent = "0";
+            progressFill.style.width = "0%";
+            document.getElementById("next-set").disabled = true;
+        }
+    }
+
+    function logSet() {
+        const day = schedule[currentDayIndex];
+        if (!day || !day.exercises[currentExIndex]) return;
+
+        const ex = day.exercises[currentExIndex];
+        const totalSets = parseInt(ex.sets) || 1;
+
+        currentSet++;
+
+        if (currentSet >= totalSets) {
+            completedEx.push(currentExIndex);
+            moveToNextExercise();
+        }
+
+        renderExercises();
+    }
+
+    function skipExercise() {
+        moveToNextExercise();
+        renderExercises();
+    }
+
+    function moveToNextExercise() {
+        const day = schedule[currentDayIndex];
+        if (!day) return;
+
+        if (currentExIndex < day.exercises.length - 1) {
+            currentExIndex++;
+            currentSet = 0;
+        } else {
+            pauseTimer();
+            alert("Workout Session Complete! Great job! 🎉");
+        }
+    }
 
     loadSchedule();
 </script>
+
 </body>
 </html>

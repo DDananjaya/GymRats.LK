@@ -5,22 +5,25 @@ function asyncHandler(fn) {
 }
 
 function errorHandler(err, req, res, next) {
-    console.error(err);
+    console.error("Error:", err);
 
-    const message = err?.message || 'Internal Server Error';
+    const message = err?.message || "Internal Server Error";
 
-    if (message.includes('UNIQUE constraint failed') || err?.code === 'SQLITE_CONSTRAINT') {
-        return res.status(409).json({ error: 'Username or Gym ID already exists' });
+    if (
+        message.includes("UNIQUE constraint failed") ||
+        message.includes("SQLITE_CONSTRAINT") ||
+        err.code === "SQLITE_CONSTRAINT"
+    ) {
+        return res.status(409).json({
+            error: "Username or Gym ID already exists",
+        });
     }
 
-    if (err?.status) {
-        return res.status(err.status).json({ error: message });
+    if (message.toLowerCase().includes("unauthorized")) {
+        return res.status(401).json({ error: "Unauthorized" });
     }
 
-    return res.status(500).json({ error: message });
+    res.status(err.status || 500).json({ error: message });
 }
 
-module.exports = {
-    asyncHandler,
-    errorHandler,
-};
+module.exports = { asyncHandler, errorHandler };

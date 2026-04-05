@@ -1,30 +1,34 @@
-const { db } = require('./db');
-const { asyncHandler } = require('./middleware');
+const db = require("./db");
+const { asyncHandler } = require("./middleware");
 
 async function getLiveList(req, res) {
-    const result = await db.execute({
-        sql: 'SELECT data FROM schedules WHERE user_id = ? LIMIT 1',
-        args: [req.userId],
+    const userId = req.userId;
+
+    const daysResult = await db.execute({
+        sql: "SELECT id, day_name FROM schedules WHERE user_id = ? ORDER BY id",
+        args: [userId],
     });
 
-    if (result.rows.length === 0) {
-        return res.json({ days: [], exercises: [] });
+    const days = [];
+
+    for (const day of daysResult.rows) {
+        const exercisesResult = await db.execute({
+            sql: `
+                SELECT name, sets, reps, type
+                FROM exercises
+                WHERE schedule_id = ?
+                ORDER BY position, id
+            `,
+            args: [day.id],
+        });
+
+        days.push({
+            day_name: day.day_name,
+            exercises: exercisesResult.rows
+        });
     }
 
-    const parsed = JSON.parse(result.rows[0].data);
-    const days = Array.isArray(parsed.days) ? parsed.days : [];
-
-    const exercises = days.flatMap((day) =>
-        (Array.isArray(day.exercises) ? day.exercises : []).map((exercise) => ({
-            day: day.day_name,
-            name: exercise.name,
-            sets: Number.parseInt(exercise.sets, 10) || 0,
-            reps: exercise.reps,
-            type: exercise.type || 'Strength',
-        }))
-    );
-
-    res.json({ days, exercises });
+    res.json({ days });
 }
 
 module.exports = {

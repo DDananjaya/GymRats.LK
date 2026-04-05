@@ -1,32 +1,19 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const { body, validationResult } = require('express-validator');
-const { db } = require('./db');
-const { asyncHandler } = require('./middleware');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const { body, validationResult } = require("express-validator");
+const db = require("./db");
+const { asyncHandler } = require("./middleware");
 
-const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || "gymrats_secret_2026";
 
 const registerValidators = [
-    body('name').trim().notEmpty().withMessage('Name is required'),
-    body('username').trim().isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-    body('age').optional({ values: 'falsy' }).isInt({ min: 10, max: 100 }).withMessage('Age must be between 10 and 100'),
-    body('gender').optional({ values: 'falsy' }).isIn(['male', 'female']).withMessage('Gender must be male or female'),
-    body('gym_id').optional({ values: 'falsy' }).trim(),
+    body("name").trim().notEmpty().withMessage("Name is required"),
+    body("username").trim().notEmpty().withMessage("Username is required"),
+    body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
+    body("gym_id").trim().notEmpty().withMessage("Gym ID is required"),
 ];
 
-const loginValidators = [
-    body('username').trim().notEmpty().withMessage('Username is required'),
-    body('password').notEmpty().withMessage('Password is required'),
-];
-
-const forgotPasswordValidators = [
-    body('username').trim().notEmpty().withMessage('Username is required'),
-    body('gym_id').trim().notEmpty().withMessage('Gym ID is required'),
-    body('new_password').isLength({ min: 6 }).withMessage('New password must be at least 6 characters'),
-];
-
-function failIfInvalid(req, res) {
+function validate(req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         res.status(400).json({ error: errors.array()[0].msg });
@@ -36,7 +23,7 @@ function failIfInvalid(req, res) {
 }
 
 async function register(req, res) {
-    if (failIfInvalid(req, res)) return;
+    if (validate(req, res)) return;
 
     const { name, username, password, age, gender, gym_id } = req.body;
     const passwordHash = await bcrypt.hash(password, 10);
@@ -46,90 +33,101 @@ async function register(req, res) {
       INSERT INTO users (name, username, password_hash, age, gender, gym_id)
       VALUES (?, ?, ?, ?, ?, ?)
     `,
-        args: [name.trim(), username.trim(), passwordHash, age || null, gender || null, gym_id?.trim() || null],
+        args: [
+            name.trim(),
+            username.trim(),
+            passwordHash,
+            age ? Number(age) : null,
+            gender || null,
+            gym_id.trim(),
+        ],
     });
 
-    res.status(201).json({ message: 'Registered successfully' });
+    res.status(201).json({ message: "Registered successfully" });
 }
 
 async function login(req, res) {
-    if (failIfInvalid(req, res)) return;
+    const username = (req.body.username || "").trim();
+    const password = req.body.password || "";
 
-    const { username, password } = req.body;
     const result = await db.execute({
-        sql: 'SELECT id, name, username, gender, password_hash FROM users WHERE username = ?',
-        args: [username.trim()],
+        sql: `SELECT * FROM users WHERE username = ? LIMIT 1`,
+        args: [username],
     });
 
     if (result.rows.length === 0) {
-        return res.status(401).json({ error: 'Invalid username or password' });
+        return res.status(401).json({ error: "Invalid username or password" });
     }
 
     const user = result.rows[0];
-    const passwordHash = user.password_hash || user.passwordHash;
-    const isValid = await bcrypt.compare(password, passwordHash);
+    const ok = await bcrypt.compare(password, user.password_hash);
 
-    if (!isValid) {
-        return res.status(401).json({ error: 'Invalid username or password' });
+    if (!ok) {
+        return res.status(401).json({ error: "Invalid username or password" });
     }
 
-    const token = jwt.sign({ sub: Number(user.id) }, JWT_SECRET, { expiresIn: '12h' });
+    const token = jwt.sign({ sub: user.id }, JWT_SECRET, { expiresIn: "12h" });
 
     res.json({
         token,
         user: {
-            id: Number(user.id),
+            id: user.id,
             name: user.name,
             username: user.username,
-            gender: user.gender || null,
+            gender: user.gender,
+            gym_id: user.gym_id,
         },
     });
 }
 
 async function forgotPassword(req, res) {
-    if (failIfInvalid(req, res)) return;
+    const username = (req.body.username || "").trim();
+    const gymId = (req.body.gym_id || "").trim();
+    const newPassword = req.body.new_password || "";
 
-    const { username, gym_id, new_password } = req.body;
+    if (!username || !gymId || newPassword.length < 6) {
+        return res.status(400).json({ error: "Invalid reset data" });
+    }
 
     const result = await db.execute({
-        sql: 'SELECT id FROM users WHERE username = ? AND gym_id = ?',
-        args: [username.trim(), gym_id.trim()],
+        sql: `SELECT id FROM users WHERE username = ? AND gym_id = ? LIMIT 1`,
+        args: [username, gymId],
     });
 
     if (result.rows.length === 0) {
-        return res.status(404).json({ error: 'User not found for that username and Gym ID' });
+        return res.status(404).json({ error: "User not found" });
     }
 
-    const passwordHash = await bcrypt.hash(new_password, 10);
+    const hash = await bcrypt.hash(newPassword, 10);
 
     await db.execute({
-        sql: 'UPDATE users SET password_hash = ? WHERE id = ?',
-        args: [passwordHash, Number(result.rows[0].id)],
+        sql: `UPDATE users SET password_hash = ? WHERE id = ?`,
+        args: [hash, result.rows[0].id],
     });
 
-    res.json({ message: 'Password updated successfully' });
+    res.json({ message: "Password updated successfully" });
 }
 
 function authGuard(req, res, next) {
-    const header = req.headers.authorization || '';
-    const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+    const header = req.headers.authorization || "";
+    const token = header.startsWith("Bearer ") ? header.slice(7) : null;
 
     if (!token) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        return res.status(401).json({ error: "Unauthorized" });
     }
 
     try {
         const payload = jwt.verify(token, JWT_SECRET);
-        req.userId = Number(payload.sub);
+        req.userId = payload.sub;
         next();
-    } catch (error) {
-        return res.status(401).json({ error: 'Invalid or expired token' });
+    } catch (err) {
+        return res.status(401).json({ error: "Unauthorized" });
     }
 }
 
 module.exports = {
     registerRoute: [...registerValidators, asyncHandler(register)],
-    loginRoute: [...loginValidators, asyncHandler(login)],
-    forgotPasswordRoute: [...forgotPasswordValidators, asyncHandler(forgotPassword)],
+    loginRoute: [asyncHandler(login)],
+    forgotPasswordRoute: [asyncHandler(forgotPassword)],
     authGuard,
 };
