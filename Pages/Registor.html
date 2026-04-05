@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="../Photos/GymRats.png">
+    <link rel="icon" href="Photos/GymRats.png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Register - GymRats LK</title>
+    <title>GymRats LK • Register</title>
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="auth-layout">
@@ -16,7 +16,7 @@
 
             <div class="auth-hero" style="margin-top: 22px;">
                 <div class="auth-logo-panel">
-                    <img src="../Photos/GymRats.png" alt="GymRats LK Logo" />
+                    <img src="Photos/GymRats.png" alt="GymRats LK Logo" />
                     <div>
                         <div class="brand-title">GymRats<span>LK</span></div>
                         <div class="brand-subtitle">Built for serious consistency</div>
@@ -56,7 +56,7 @@
     <section class="auth-panel">
         <div class="auth-card">
             <div class="auth-top">
-                <img class="mini-logo" src="../Photos/GymRats.png" alt="GymRats LK Logo" />
+                <img class="mini-logo" src="Photos/GymRats.png" alt="GymRats LK Logo" />
                 <h2>Join GymRats!</h2>
                 <p>Create an account to start tracking.</p>
             </div>
@@ -88,6 +88,8 @@
 </div>
 
 <script>
+    const API_BASE = "https://gymrats-lk.onrender.com";
+
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
         e.preventDefault();
 
@@ -101,7 +103,7 @@
         };
 
         try {
-            const response = await fetch("http://localhost:4000/api/auth/register", {
+            const response = await fetch(`${API_BASE}/api/auth/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(userData),
@@ -117,8 +119,7 @@
             alert("Registration successful! Please login.");
             window.location.href = "Login.html";
         } catch (err) {
-            console.error(err);
-            alert("Server error. Please ensure your backend is running on localhost:4000.");
+            alert("Server error. Please try again in a few seconds.");
         }
     });
 </script>
