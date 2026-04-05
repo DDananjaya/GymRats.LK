@@ -1,315 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="../Photos/GymRats.png">
+    <link rel="icon" href="Photos/GymRats.png">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Workout Schedule – GymRats LK</title>
-
+    <title>GymRats LK • Reset Password</title>
     <link rel="stylesheet" href="styles.css" />
-    <style>
-        .dashboard-layout { background: #f4f7fa; }
-        .main-content { max-width: 1000px; padding: 20px 30px 60px; }
-        .card {
-            max-width: 100%;
-            padding: 0;
-            background: #fff;
-            border: 1px solid #e0e5eb;
-            border-radius: 16px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
-        .day-header {
-            padding: 20px 25px 15px;
-            border-bottom: 1px solid #f0f3f7;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .day-label-input {
-            background: #fff;
-            border: 1px solid #e0e5eb;
-            color: #333;
-            border-radius: 8px;
-            padding: 12px;
-            font-weight: bold;
-            flex: 1;
-            font-size: 16px;
-        }
-        .ex-list { padding: 10px 25px 20px; }
-        .labels-row {
-            display: flex;
-            gap: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            color: #778ca2;
-            padding: 15px 0 8px;
-            border-bottom: 1px solid #f0f3f7;
-        }
-        .ex-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            padding: 8px 0;
-        }
-        .ex-row input,
-        .ex-row select {
-            width: 100%;
-            border: 1px solid #e0e5eb;
-            border-radius: 8px;
-            padding: 12px;
-        }
-        .btn-add-ex {
-            width: 100%;
-            text-align: center;
-            color: #38bdf8;
-            border: 1px dashed rgba(56, 189, 248, 0.3);
-            padding: 14px;
-            margin-top: 15px;
-        }
-        .btn-remove-ex { width: 42px; height: 42px; }
-        #userAvatar { color: #fff; }
-    </style>
 </head>
-<body class="dashboard-layout">
-<header class="site-header">
-    <div class="header-left">
-        <a href="Schedule.html" class="brand-wrap">
-            <img src="../Photos/GymRats.png" alt="GymRats LK Logo" class="brand-logo" />
-            <div class="brand-text">
-                <div class="brand-title">GymRats<span>LK</span></div>
-                <div class="brand-subtitle">Workout planner</div>
-            </div>
-        </a>
+<body class="auth-layout">
 
-        <nav class="nav-links">
-            <a href="Schedule.html" class="nav-link active">📅 Schedule</a>
-            <a href="LiveSession.html" class="nav-link">🔴 Live Sessions</a>
-        </nav>
-    </div>
-
-    <div class="header-right">
-        <div class="user-avatar" id="userAvatar">?</div>
-        <span id="userName" style="display:none;"></span>
-        <button class="btn btn-logout" id="logoutBtn">Sign Out</button>
-    </div>
-</header>
-
-<main class="main-content">
-    <div class="page-title" style="display:flex;justify-content:space-between;margin-bottom:25px;">
+<div class="auth-shell">
+    <section class="auth-showcase">
         <div>
-            <h2>Workout Builder</h2>
-            <p>Organize your routine by days</p>
-        </div>
-        <div>
-            <button id="add-day">+ Add Day</button>
-            <button id="save-all">💾 Save Schedule</button>
-        </div>
-    </div>
+            <div class="auth-badge">🔐 Secure Password Reset</div>
 
-    <div id="days-container"></div>
-</main>
+            <div class="auth-hero" style="margin-top: 22px;">
+                <div class="auth-logo-panel">
+                    <img src="Photos/GymRats.png" alt="GymRats LK Logo" />
+                    <div>
+                        <div class="brand-title">GymRats<span>LK</span></div>
+                        <div class="brand-subtitle">Quick account recovery</div>
+                    </div>
+                </div>
 
-<template id="day-template">
-    <section class="card">
-        <div class="day-header">
-            <input class="day-label-input" type="text" placeholder="e.g. Chest Day" />
-            <button class="btn-sm btn-remove-day remove-day-btn">Remove Day</button>
-        </div>
-
-        <div class="ex-list">
-            <div class="labels-row">
-                <div style="flex:1;">Exercise</div>
-                <div style="width:90px;">Sets</div>
-                <div style="width:90px;">Reps</div>
-                <div style="width:140px;">Type</div>
-                <div style="width:42px;"></div>
+                <h1 style="margin-top: 28px;">Reset and get back to training.</h1>
+                <p>Use your username and gym ID to securely set a new password and continue where you left off.</p>
             </div>
+        </div>
 
-            <div class="exercise-rows-container"></div>
-            <button class="btn-add-ex">+ Add Exercise</button>
+        <div class="auth-feature-list">
+            <div class="auth-feature">
+                <div>🪪</div>
+                <div>
+                    <strong>Verify with gym ID</strong>
+                    <span>Match your account using the ID given by your gym.</span>
+                </div>
+            </div>
+            <div class="auth-feature">
+                <div>🔒</div>
+                <div>
+                    <strong>Set a new password</strong>
+                    <span>Create a new secure password instead of exposing the old one.</span>
+                </div>
+            </div>
+            <div class="auth-feature">
+                <div>⚡</div>
+                <div>
+                    <strong>Fast recovery</strong>
+                    <span>Reset in seconds and return to your dashboard.</span>
+                </div>
+            </div>
         </div>
     </section>
-</template>
 
-<template id="ex-template">
-    <div class="ex-row">
-        <div style="flex:1;">
-            <input class="ex-name" type="text" placeholder="Exercise Name" />
+    <section class="auth-panel">
+        <div class="auth-card">
+            <div class="auth-top">
+                <img class="mini-logo" src="Photos/GymRats.png" alt="GymRats LK Logo" />
+                <h2>Reset Password</h2>
+                <p>Enter your username, Gym ID, and a new password.</p>
+            </div>
+
+            <form id="forgotForm">
+                <input type="text" id="username" placeholder="Username" required />
+                <input type="text" id="gym_id" placeholder="Gym ID (e.g. 121)" required />
+                <input type="password" id="new_password" placeholder="New Password" required />
+                <input type="password" id="confirm_password" placeholder="Confirm New Password" required />
+                <button type="submit">Reset Password</button>
+            </form>
+
+            <div class="auth-links">
+                <p>Remembered your password? <a href="Login.html">Login</a></p>
+            </div>
+
+            <div class="auth-note">Your old password is not shown. You create a new one securely.</div>
         </div>
-        <div style="width:90px;">
-            <input class="ex-sets" type="number" min="1" placeholder="3" />
-        </div>
-        <div style="width:90px;">
-            <input class="ex-reps" type="text" placeholder="12" />
-        </div>
-        <div style="width:140px;">
-            <select class="ex-type">
-                <option value="Strength">Strength</option>
-                <option value="Cardio">Cardio</option>
-                <option value="Mobility">Mobility</option>
-            </select>
-        </div>
-        <div style="width:42px;">
-            <button class="btn-remove-ex remove-ex-btn">✕</button>
-        </div>
-    </div>
-</template>
+    </section>
+</div>
 
 <script>
-    const token = localStorage.getItem("gr_token");
-    const userRaw = localStorage.getItem("gr_user");
+    const API_BASE = "https://gymrats-lk.onrender.com";
 
-    if (!token) {
-        window.location.href = "Login.html";
-    }
+    document.getElementById("forgotForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    let currentUser = {};
-    try {
-        currentUser = JSON.parse(userRaw) || {};
-    } catch {
-        currentUser = {};
-    }
+        const username = document.getElementById("username").value.trim();
+        const gym_id = document.getElementById("gym_id").value.trim();
+        const new_password = document.getElementById("new_password").value.trim();
+        const confirm_password = document.getElementById("confirm_password").value.trim();
 
-    if (currentUser.name) {
-        document.getElementById("userName").textContent = currentUser.name;
-        document.getElementById("userName").style.display = "inline-block";
-        document.getElementById("userAvatar").textContent =
-            currentUser.name.charAt(0).toUpperCase();
-    }
-
-    document.getElementById("logoutBtn").onclick = () => {
-        localStorage.clear();
-        window.location.href = "Login.html";
-    };
-
-    const API_URL = "http://localhost:4000/api/schedules";
-    const daysContainer = document.getElementById("days-container");
-    const dayTpl = document.getElementById("day-template");
-    const exTpl = document.getElementById("ex-template");
-
-    document.getElementById("add-day").onclick = () => addDay();
-    document.getElementById("save-all").onclick = saveSchedule;
-
-    function addDay(data = {}) {
-        const node = dayTpl.content.cloneNode(true);
-        const section = node.querySelector(".card");
-        const nameInput = node.querySelector(".day-label-input");
-        const rowsContainer = node.querySelector(".exercise-rows-container");
-
-        nameInput.value = data.day_name || "";
-
-        if (Array.isArray(data.exercises) && data.exercises.length > 0) {
-            data.exercises.forEach((ex) => addExercise(rowsContainer, ex));
-        } else {
-            addExercise(rowsContainer);
+        if (new_password.length < 6) {
+            alert("Password must be at least 6 characters.");
+            return;
         }
 
-        node.querySelector(".btn-add-ex").onclick = () => addExercise(rowsContainer);
-
-        node.querySelector(".remove-day-btn").onclick = () => {
-            if (confirm("Remove this day?")) {
-                section.remove();
-            }
-        };
-
-        daysContainer.appendChild(node);
-    }
-
-    function addExercise(container, data = {}) {
-        const rowNode = exTpl.content.cloneNode(true);
-        const rowDiv = rowNode.querySelector(".ex-row");
-
-        rowDiv.querySelector(".ex-name").value = data.name || "";
-        rowDiv.querySelector(".ex-sets").value = data.sets || "";
-        rowDiv.querySelector(".ex-reps").value = data.reps || "";
-        rowDiv.querySelector(".ex-type").value = data.type || "Strength";
-
-        rowDiv.querySelector(".remove-ex-btn").onclick = () => rowDiv.remove();
-        container.appendChild(rowNode);
-    }
-
-    function collectWorkoutData() {
-        return [...document.querySelectorAll(".card")]
-            .map((dayCard) => ({
-                day_name: dayCard.querySelector(".day-label-input").value.trim(),
-                exercises: [...dayCard.querySelectorAll(".ex-row")]
-                    .map((row) => ({
-                        name: row.querySelector(".ex-name").value.trim(),
-                        sets: row.querySelector(".ex-sets").value.trim(),
-                        reps: row.querySelector(".ex-reps").value.trim(),
-                        type: row.querySelector(".ex-type").value,
-                    }))
-                    .filter((ex) => ex.name),
-            }))
-            .filter((day) => day.day_name);
-    }
-
-    async function saveSchedule() {
-        const btn = document.getElementById("save-all");
-        btn.disabled = true;
-        btn.textContent = "Saving...";
-
-        const workoutData = { days: collectWorkoutData() };
-
-        if (workoutData.days.length === 0) {
-            alert("Add at least one workout day!");
-            btn.disabled = false;
-            btn.textContent = "💾 Save Schedule";
+        if (new_password !== confirm_password) {
+            alert("Passwords do not match.");
             return;
         }
 
         try {
-            const response = await fetch(API_URL, {
+            const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(workoutData),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, gym_id, new_password })
             });
 
-            const result = await response.json();
+            const data = await res.json();
 
-            if (!response.ok) {
-                alert(result.error || "Failed to save schedule");
+            if (!res.ok) {
+                alert(data.error || "Password reset failed");
                 return;
             }
 
-            alert("Schedule saved successfully! ✅");
-        } catch (error) {
-            console.error("Network Error:", error);
-            alert("Network error. Is backend running?");
-        } finally {
-            btn.disabled = false;
-            btn.textContent = "💾 Save Schedule";
-        }
-    }
-
-    async function loadSchedule() {
-        try {
-            const res = await fetch(API_URL, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            if (!res.ok) throw new Error("Load failed");
-
-            const data = await res.json();
-            daysContainer.innerHTML = "";
-
-            if (!data.days || data.days.length === 0) {
-                addDay();
-            } else {
-                data.days.forEach(addDay);
-            }
+            alert("Password updated successfully. Please login.");
+            window.location.href = "Login.html";
         } catch (err) {
-            console.error("Load Error:", err);
-            daysContainer.innerHTML = "";
-            addDay();
+            alert("Server error. Please try again in a few seconds.");
         }
-    }
-
-    loadSchedule();
+    });
 </script>
 </body>
 </html>
