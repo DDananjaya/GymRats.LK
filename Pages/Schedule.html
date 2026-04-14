@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" href="../Photos/GymRats.png">
+    <link rel="icon" href="Photos/GymRats.png" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Workout Schedule – GymRats LK</title>
-
+    <title>GymRats LK • Schedule</title>
     <link rel="stylesheet" href="styles.css" />
     <style>
         .dashboard-layout { background: #f4f7fa; }
@@ -75,7 +74,7 @@
 <header class="site-header">
     <div class="header-left">
         <a href="Schedule.html" class="brand-wrap">
-            <img src="../Photos/GymRats.png" alt="GymRats LK Logo" class="brand-logo" />
+            <img src="Photos/GymRats.png" alt="GymRats LK Logo" class="brand-logo" />
             <div class="brand-text">
                 <div class="brand-title">GymRats<span>LK</span></div>
                 <div class="brand-subtitle">Workout planner</div>
@@ -159,6 +158,8 @@
 <script>
     const token = localStorage.getItem("gr_token");
     const userRaw = localStorage.getItem("gr_user");
+    const API_BASE = "";
+    const API_URL = `${API_BASE}/api/schedules`;
 
     if (!token) {
         window.location.href = "Login.html";
@@ -183,7 +184,6 @@
         window.location.href = "Login.html";
     };
 
-    const API_URL = "http://localhost:4000/api/schedules";
     const daysContainer = document.getElementById("days-container");
     const dayTpl = document.getElementById("day-template");
     const exTpl = document.getElementById("ex-template");
@@ -278,8 +278,7 @@
 
             alert("Schedule saved successfully! ✅");
         } catch (error) {
-            console.error("Network Error:", error);
-            alert("Network error. Is backend running?");
+            alert("Network error. Please try again.");
         } finally {
             btn.disabled = false;
             btn.textContent = "💾 Save Schedule";
@@ -289,21 +288,27 @@
     async function loadSchedule() {
         try {
             const res = await fetch(API_URL, {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             });
 
-            if (!res.ok) throw new Error("Load failed");
+            if (res.status === 401) {
+                localStorage.clear();
+                window.location.href = "Login.html";
+                return;
+            }
 
             const data = await res.json();
+
             daysContainer.innerHTML = "";
 
-            if (!data.days || data.days.length === 0) {
-                addDay();
+            if (Array.isArray(data.days) && data.days.length > 0) {
+                data.days.forEach((day) => addDay(day));
             } else {
-                data.days.forEach(addDay);
+                addDay();
             }
         } catch (err) {
-            console.error("Load Error:", err);
             daysContainer.innerHTML = "";
             addDay();
         }
