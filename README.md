@@ -1,234 +1,50 @@
-GymRats.LK
+# 🏋️‍♂️ GymRats.LK
+
 <p align="center">
-  <strong>Train smarter. Track better.</strong><br/>
-  A clean fitness web app for planning workouts, managing weekly schedules, and running live training sessions.
+  <img src="https://img.shields.io/badge/Status-In%20Progress-black?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Frontend-HTML%20%7C%20CSS%20%7C%20JS-1f1f1f?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Backend-Node.js%20%7C%20Express-2b2b2b?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Database-Turso%20(libSQL)-3a3a3a?style=for-the-badge" />
 </p>
+
 <p align="center">
-  <a href="#overview">Overview</a> •
-  <a href="#features">Features</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#project-structure">Project Structure</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#api-endpoints">API Endpoints</a>
+  <b>Train Smart • Track Progress • Stay Consistent</b>
 </p>
+
+<p align="center">
+  GymRats.LK is a lightweight fitness web app built to help users plan workouts,
+  manage schedules, and track live gym sessions with ease.
+</p>
+
 ---
-Overview
-GymRats.LK is a workout planning and live session tracking platform built for gym members who want a simple, focused workflow:
-create an account linked to a Gym ID
-log in securely
-build a personalized weekly workout schedule
-save exercises with sets, reps, and workout type
-open Live Session mode to follow the routine in real time
-recover account access with a password reset flow
-The project combines a static multi-page frontend with an Express-based backend that handles authentication, schedule storage, and live session data.
+
+## ✨ Features
+
+- 🔐 Secure user authentication
+- 📅 Weekly workout scheduling
+- 🏋️ Exercise, sets, and reps tracking
+- ⏱️ Live workout session timer
+- 🔄 Password recovery
+- 🎯 Simple and focused user experience
+
 ---
-Features
-Authentication
-User registration with:
-name
-username
-password
-age
-gender
-gym ID
-Secure login using JWT
-Password reset using username + gym ID
-Password hashing with bcrypt
-Workout Schedule Builder
-Add multiple workout days
-Add multiple exercises per day
-Store:
-exercise name
-sets
-reps
-workout type
-Save the complete schedule to the backend
-Reload saved schedules after login
-Live Workout Session
-Dedicated live workout mode
-Stopwatch controls:
-start
-pause
-reset
-Track current exercise and set progress
-Mark sets as completed
-Skip exercises when needed
-View workout checklist during the session
-User Flow
-Automatic redirect from entry page to login
-Navigate from login to schedule builder
-Move from saved schedule into live session mode
-Sign out and clear local session data
+
+## 🛠️ Tech Stack
+
+| Layer     | Technology |
+|-----------|------------|
+| Frontend  | HTML, CSS, JavaScript |
+| Backend   | Node.js, Express |
+| Database  | Turso (libSQL) |
+| Auth      | JWT, bcrypt |
+
 ---
-Why this project stands out
-GymRats.LK is not trying to be a massive fitness ecosystem. Its strength is the opposite: it focuses on a minimal, practical gym workflow.
-It feels like a project designed for users who want:
-less distraction
-faster access to their workout plan
-a structured schedule builder
-a simple live training companion
-That makes it ideal as:
-a student software project
-a portfolio-ready fitness web app
-a base product for a gym membership platform
-a starter project for extending into analytics, trainer dashboards, or meal plans
----
-Tech Stack
-Frontend
-HTML
-CSS
-Vanilla JavaScript
-Backend
-Node.js
-Express
-express-validator
-bcryptjs
-jsonwebtoken
-cors
-Database
-Turso / libSQL via `@libsql/client`
-Dev / Hosting
-Vercel (`vercel dev`)
----
-Project Structure
-```text
+
+## 📂 Project Structure
+
+```bash
 GymRats.LK/
-├── Pages/
-│   ├── index.html
-│   ├── Login.html
-│   ├── Registor.html
-│   ├── Forgotpass.html
-│   ├── Schedule.html
-│   ├── LiveSession.html
-│   ├── styles.css
-│   └── Photos/
-├── api/
-│   └── index.js
-├── index.html
+├── Pages/          # Frontend pages
+├── api/            # Backend API
 ├── package.json
-├── package-lock.json
-├── .env
-└── README.md
-```
----
-How it works
-1. Entry Point
-The root `index.html` redirects users to the login page.
-2. Login & Registration
-Users can register a new account or sign in with existing credentials. Successful login stores a JWT token in local storage.
-3. Schedule Builder
-After login, the user is redirected to `Schedule.html`, where they can create workout days and exercises.
-4. Live Session
-The app uses saved schedule data to power a live training screen with a timer, progress display, and completion flow.
-5. API Layer
-The Express backend exposes endpoints for:
-register
-login
-reset password
-save schedules
-load schedules
-load live session data
----
-Getting Started
-Prerequisites
-Make sure you have:
-Node.js installed
-a Turso database configured
-Vercel CLI installed (optional, but recommended for local dev)
-Installation
-```bash
-npm install
-```
-Environment Variables
-Create a `.env` file with:
-```env
-TURSO_DATABASE_URL=your_turso_database_url
-TURSO_AUTH_TOKEN=your_turso_auth_token
-JWT_SECRET=your_jwt_secret
-```
-Run Locally
-```bash
-npm run dev
-```
-This starts the project using:
-```bash
-vercel dev
-```
----
-API Endpoints
-Health Check
-```http
-GET /api/health
-```
-Authentication
-```http
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/forgot-password
-```
-Workout Schedules
-```http
-GET /api/schedules
-POST /api/schedules
-```
-Live Session
-```http
-GET /api/live-session
-```
----
-Data Model Summary
-From the backend logic, the app appears to use a structure similar to this:
-users
-id
-name
-username
-password_hash
-age
-gender
-gym_id
-schedules
-id
-user_id
-day_name
-exercises
-id
-schedule_id
-name
-sets
-reps
-type
-position
----
-Current Product Idea
-At its core, GymRats.LK is a personal workout organization system.
-A simple way to describe it:
-> A gym-focused web application that helps users register, build their weekly training plan, and follow their workouts in a live guided session.
-It sits between a planner and a lightweight workout tracker.
----
-Suggested future improvements
-Here are some strong next steps if you want to grow the project:
-add trainer/admin dashboard
-support exercise history and workout logs
-add rest timers per exercise
-include progress analytics and charts
-enable profile editing
-add gym announcements or notices
-improve password recovery with email OTP
-make the UI fully mobile-first
-add exercise images or demo videos
-support shared plans from coaches
----
-Deployment
-The repository references a live Vercel deployment in the GitHub About section. You can continue using Vercel as the simplest hosting option for both frontend and serverless API behavior.
----
-Notes
-The current README in the repository is only a placeholder.
-The project already has a strong foundation for a polished portfolio piece.
-The branding and page copy suggest a modern gym-product direction with a clean, focused user journey.
----
-License
-No license is currently defined in the repository. Add a license section here if you plan to make the project open source.
----
-<p align="center">
-  Built for disciplined training, structured schedules, and focused workout sessions.
-</p>
+└── vercel.json
