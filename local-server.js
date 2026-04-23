@@ -1,0 +1,20 @@
+const app = require('./api/index.js');
+const express = require('express');
+const path = require('path');
+require('dotenv').config();
+
+const port = process.env.PORT || 3000;
+
+// Serve static files from the root and Pages directory
+app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'Pages')));
+
+// Fallback to index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(port, () => {
+    console.log(`GymRats LK local server running at http://localhost:${port}`);
+    console.log(`API routes available at http://localhost:${port}/api`);
+});

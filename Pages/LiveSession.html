@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="Photos/GymRats.png" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GymRats LK • Live Session</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .live-layout {
+            background: #0f172a;
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+        .live-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 24px;
+            background: #111827;
+            border-bottom: 1px solid #1f2937;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .live-main {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 20px 60px;
+        }
+        .live-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+        .live-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .timer {
+            font-size: 44px;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+        .pill {
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: #0b1224;
+            border: 1px solid #1f2937;
+            color: #94a3b8;
+            font-size: 12px;
+            display: inline-block;
+        }
+        .exercise-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #1f2937;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            gap: 12px;
+        }
+        .exercise-item.active {
+            background: #1e293b;
+            border-left: 4px solid #38bdf8;
+        }
+        .exercise-item.completed {
+            opacity: 0.55;
+            background: #0f172a;
+        }
+        .exercise-item.completed .ex-name {
+            text-decoration: line-through;
+            color: #64748b;
+        }
+        .check-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #38bdf8;
+            display: inline-block;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+        .completed .check-circle {
+            background: #38bdf8;
+            position: relative;
+        }
+        .completed .check-circle::after {
+            content: "✓";
+            color: #0b1224;
+            font-size: 14px;
+            position: absolute;
+            left: 3px;
+            top: -2px;
+        }
+        .live-select {
+            background: #0b1224;
+            color: #e2e8f0;
+            border: 1px solid #1f2937;
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+        .live-btn {
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .live-btn.primary {
+            background: #38bdf8;
+            color: #0b1224;
+        }
+        .live-btn.primary:disabled {
+            background: #1f2937;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        .live-btn.secondary {
+            background: transparent;
+            color: #e2e8f0;
+            border: 1px solid #1f2937;
+        }
+        progress {
+            width: 100%;
+            height: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        progress::-webkit-progress-bar {
+            background: #1f2937;
+        }
+        progress::-webkit-progress-value {
+            background: #38bdf8;
+        }
+    </style>
+</head>
+<body class="live-layout">
+<header class="live-header">
+    <div class="brand-wrap">
+        <img src="Photos/GymRats.png" alt="GymRats LK Logo" class="brand-logo" />
+        <div class="brand-text">
+            <div class="brand-title" style="color:#fff;">GymRats<span>LK</span></div>
+            <div class="brand-subtitle">Live workout mode</div>
+        </div>
+    </div>
+
+    <div class="live-row">
+        <a href="Schedule.html" class="nav-link" style="color:#cbd5e1;">📅 Schedule</a>
+        <a href="LiveSession.html" class="nav-link active" style="color:#38bdf8;">🔴 Live Sessions</a>
+        <select id="day-picker" class="live-select">
+            <option>Loading...</option>
+        </select>
+        <button class="live-btn secondary" id="reload">⟳ Reload</button>
+        <button class="live-btn secondary" id="logoutBtn">Sign Out</button>
+    </div>
+</header>
+
+<main class="live-main">
+    <section class="live-card">
+        <div class="live-row" style="justify-content: space-between; align-items: flex-start;">
+            <div>
+                <div class="pill">Stopwatch</div>
+                <div class="timer" id="session-clock">00:00</div>
+                <div class="live-row">
+                    <button class="live-btn primary" id="start">▶ Start</button>
+                    <button class="live-btn secondary" id="pause">⏸ Pause</button>
+                    <button class="live-btn secondary" id="reset">↺ Reset</button>
+                </div>
+            </div>
+
+            <div style="flex:1; max-width: 430px;">
+                <div class="pill">Now Tracking</div>
+                <div id="current-ex-name" style="font-size:24px; font-weight:700; margin: 6px 0;">–</div>
+                <div id="current-ex-meta" style="color:#94a3b8; margin-bottom: 10px;">Sets: –, Reps: –</div>
+
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                    <span>Progress: <span id="set-count">0</span> / <span id="total-sets">0</span> Sets</span>
+                </div>
+
+                <progress id="set-progress" max="1" value="0"></progress>
+
+                <div class="live-row" style="margin-top:12px;">
+                    <button class="live-btn primary" id="next-set" style="flex:1;">Log Set (Done)</button>
+                    <button class="live-btn secondary" id="next-ex">Skip</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="live-card">
+        <div class="pill" style="margin-bottom:12px;">Workout Checklist</div>
+        <div id="exercise-list"></div>
+    </section>
+</main>
+
+<script>
+    const API_BASE = "";
+    const token = localStorage.getItem("gr_token");
+
+    if (!token) {
+        window.location.href = "Login.html";
+    }
+
+    const API = {
+        get: `${API_BASE}/api/live-session`
+    };
+
+    let schedule = [];
+    let currentDayIndex = 0;
+    let currentExIndex = 0;
+    let currentSet = 0;
+    let sessionInterval = null;
+    let elapsedSec = 0;
+    let completedEx = [];
+
+    const dayPicker = document.getElementById("day-picker");
+    const exerciseList = document.getElementById("exercise-list");
+    const currentExName = document.getElementById("current-ex-name");
+    const currentExMeta = document.getElementById("current-ex-meta");
+    const setProgress = document.getElementById("set-progress");
+    const clock = document.getElementById("session-clock");
+    const setCountText = document.getElementById("set-count");
+    const totalSetsText = document.getElementById("total-sets");
+
+    document.getElementById("start").onclick = startTimer;
+    document.getElementById("pause").onclick = pauseTimer;
+    document.getElementById("reset").onclick = resetTimer;
+    document.getElementById("reload").onclick = loadSchedule;
+    document.getElementById("next-set").onclick = logSet;
+    document.getElementById("next-ex").onclick = skipExercise;
+    document.getElementById("logoutBtn").onclick = () => {
+        localStorage.clear();
+        window.location.href = "Login.html";
+    };
+
+    dayPicker.onchange = () => {
+        currentDayIndex = dayPicker.selectedIndex;
+        resetSessionState();
+        renderExercises();
+    };
+
+    function startTimer() {
+        if (sessionInterval) return;
+        sessionInterval = setInterval(() => {
+            elapsedSec++;
+            clock.textContent = formatTime(elapsedSec);
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        clearInterval(sessionInterval);
+        sessionInterval = null;
+    }
+
+    function resetTimer() {
+        pauseTimer();
+        elapsedSec = 0;
+        clock.textContent = "00:00";
+        resetSessionState();
+        renderExercises();
+    }
+
+    function resetSessionState() {
+        currentExIndex = 0;
+        currentSet = 0;
+        completedEx = [];
+    }
+
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60).toString().padStart(2, "0");
+        const s = (sec % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
+    }
+
+    async function loadSchedule() {
+        try {
+            const res = await fetch(API.get, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (res.status === 401) {
+                localStorage.clear();
+                window.location.href = "Login.html";
+                return;
+            }
+
+            const data = await res.json();
+            schedule = data.days || [];
+
+            dayPicker.innerHTML = "";
+
+            if (schedule.length === 0) {
+                dayPicker.innerHTML = "<option>No Schedules Found</option>";
+                exerciseList.innerHTML = "<p style='color:#94a3b8;'>No saved workout days found.</p>";
+                currentExName.textContent = "No workout loaded";
+                currentExMeta.textContent = "Create a schedule first.";
+                document.getElementById("next-set").disabled = true;
+                return;
+            }
+
+            schedule.forEach((d, i) => {
+                const opt = document.createElement("option");
+                opt.textContent = d.day_name || `Day ${i + 1}`;
+                dayPicker.appendChild(opt);
+            });
+
+            resetSessionState();
+            renderExercises();
+        } catch (err) {
+            alert("Error loading live session data.");
+        }
+    }
+
+    function renderExercises() {
+        const day = schedule[currentDayIndex] || { exercises: [] };
+        exerciseList.innerHTML = "";
+
+        day.exercises.forEach((ex, idx) => {
+            const isCompleted = completedEx.includes(idx);
+            const isActive = idx === currentExIndex && !isCompleted;
+
+            const row = document.createElement("div");
+            row.className = `exercise-item ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`;
+            row.innerHTML = `
+                <div class="live-row">
+                    <span class="check-circle"></span>
+                    <div>
+                        <div class="ex-name" style="font-weight:700;">${ex.name}</div>
+                        <div style="color:#94a3b8; font-size:13px;">${ex.sets || "-"} Sets · ${ex.reps || "-"} Reps · ${ex.type || "Strength"}</div>
+                    </div>
+                </div>
+                <div class="pill">${isCompleted ? "Done" : (isActive ? "Active" : "Wait")}</div>
+            `;
+            exerciseList.appendChild(row);
+        });
+
+        const ex = day.exercises[currentExIndex];
+
+        if (ex && !completedEx.includes(currentExIndex)) {
+            currentExName.textContent = ex.name;
+            currentExMeta.textContent = `Target: ${ex.sets || "-"} Sets of ${ex.reps || "-"}`;
+            const totalSets = parseInt(ex.sets) || 1;
+            totalSetsText.textContent = totalSets;
+            setCountText.textContent = currentSet;
+            setProgress.max = totalSets;
+            setProgress.value = currentSet;
+            document.getElementById("next-set").disabled = false;
+        } else {
+            currentExName.textContent =
+                completedEx.length === day.exercises.length && day.exercises.length > 0
+                    ? "Workout Finished! 🎉"
+                    : "Ready?";
+            currentExMeta.textContent = "Select a day or start the timer.";
+            setProgress.max = 1;
+            setProgress.value = 0;
+            setCountText.textContent = 0;
+            totalSetsText.textContent = 0;
+            document.getElementById("next-set").disabled = true;
+        }
+    }
+
+    function logSet() {
+        const day = schedule[currentDayIndex];
+        if (!day || !day.exercises[currentExIndex]) return;
+
+        const ex = day.exercises[currentExIndex];
+        const totalSets = parseInt(ex.sets) || 1;
+
+        currentSet++;
+        setCountText.textContent = currentSet;
+        setProgress.value = currentSet;
+
+        if (currentSet >= totalSets) {
+            completedEx.push(currentExIndex);
+            currentExIndex++;
+            currentSet = 0;
+        }
+
+        renderExercises();
+    }
+
+    function skipExercise() {
+        const day = schedule[currentDayIndex];
+        if (!day || !day.exercises[currentExIndex]) return;
+
+        completedEx.push(currentExIndex);
+        currentExIndex++;
+        currentSet = 0;
+        renderExercises();
+    }
+
+    loadSchedule();
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" href="Photos/GymRats.png" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GymRats LK • Register</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="auth-layout">
+
+<div class="auth-shell">
+    <section class="auth-showcase">
+        <div>
+            <div class="auth-badge">🔥 Start Your Fitness Journey</div>
+
+            <div class="auth-hero" style="margin-top: 22px;">
+                <div class="auth-logo-panel">
+                    <img src="Photos/GymRats.png" alt="GymRats LK Logo" />
+                    <div>
+                        <div class="brand-title">GymRats<span>LK</span></div>
+                        <div class="brand-subtitle">Built for serious consistency</div>
+                    </div>
+                </div>
+
+                <h1 style="margin-top: 28px;">Create your GymRats account.</h1>
+                <p>Register once and start building workout days, saving exercises, and tracking every live training session.</p>
+            </div>
+        </div>
+
+        <div class="auth-feature-list">
+            <div class="auth-feature">
+                <div>👤</div>
+                <div>
+                    <strong>Personal profile</strong>
+                    <span>Keep your training account connected to your gym ID.</span>
+                </div>
+            </div>
+            <div class="auth-feature">
+                <div>🧩</div>
+                <div>
+                    <strong>Simple workout builder</strong>
+                    <span>Add structured workout days with exercises, sets, and reps.</span>
+                </div>
+            </div>
+            <div class="auth-feature">
+                <div>📈</div>
+                <div>
+                    <strong>Workout flow</strong>
+                    <span>Move directly from your saved schedule into live session mode.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="auth-panel">
+        <div class="auth-card">
+            <div class="auth-top">
+                <img class="mini-logo" src="Photos/GymRats.png" alt="GymRats LK Logo" />
+                <h2>Join GymRats!</h2>
+                <p>Create an account to start tracking.</p>
+            </div>
+
+            <form id="registerForm">
+                <input type="text" id="name" placeholder="Full Name" required />
+                <input type="text" id="username" placeholder="Choose a Username" required />
+
+                <div class="row">
+                    <input type="number" id="age" placeholder="Age" min="10" max="100" />
+                    <select id="gender">
+                        <option value="" selected>Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+
+                <input type="text" id="gym_id" placeholder="Gym ID (e.g. 401)" required />
+                <input type="password" id="password" placeholder="Create Password" required />
+
+                <button type="submit">Register</button>
+            </form>
+
+            <div class="auth-links">
+                <p>Already have an account? <a href="Login.html">Login</a></p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    const API_BASE = "";
+
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const userData = {
+            name: document.getElementById("name").value.trim(),
+            username: document.getElementById("username").value.trim(),
+            password: document.getElementById("password").value.trim(),
+            age: document.getElementById("age").value.trim(),
+            gender: document.getElementById("gender").value,
+            gym_id: document.getElementById("gym_id").value.trim(),
+        };
+
+        try {
+            const response = await fetch(`${API_BASE}/api/auth/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(userData),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                alert(result.error || "Registration failed");
+                return;
+            }
+
+            alert("Registration successful! Please login.");
+            window.location.href = "Login.html";
+        } catch (err) {
+            alert("Server error. Please try again in a few seconds.");
+        }
+    });
+</script>
+</body>
+</html>
